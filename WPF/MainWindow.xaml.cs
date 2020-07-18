@@ -1,0 +1,920 @@
+﻿using System;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Data;
+//using MySqlConnector;
+using MySql.Data.MySqlClient;
+using YahooFinanceApi;
+using trading_WPF.Trading;
+using System.Configuration;
+using System.Windows.Media;
+using System.Windows.Threading;
+using System.Collections;
+
+namespace trading_WPF
+{
+
+    public partial class MainWindow : Window
+    {
+
+        private MySqlConnection connection;
+        private string server;
+        private string database;
+        private string user;
+        private string password;
+        private string port;
+        private string connectionString;
+        private string sslM;
+        public string SelectedSymbol;
+        string query;
+
+        bool status = false;
+        ArrayList mySymbols = new ArrayList();
+
+        string sproc = "call ACT();";
+
+        private DateTime start;
+        private DateTime end;
+
+
+
+
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            StartDate.SelectedDate = DateTime.Today.AddDays(-30);
+            EndDate.SelectedDate = DateTime.Today.AddDays(-1);
+            start = StartDate.SelectedDate.Value;
+            end = EndDate.SelectedDate.Value;
+
+            //connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
+            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
+            connection = new MySqlConnection(connectionString);
+
+            ShowSymbolsList();
+
+        }
+
+
+
+        private volatile bool symbolListLoading;
+        private void ShowSymbolsList()
+        {
+            try
+            {
+                if (symbolListLoading)
+                    return;
+
+                SymbolsList.IsEnabled = false;
+
+                Task.Factory.StartNew(() =>
+                {
+                    try
+                    {
+                        Log(msg: $"...");
+
+                        string query = "SELECT symbol_short FROM algotrade.static where status = 'A';";
+                        MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                        MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+                        using (MysqlDataAdapter)
+                        {
+
+
+                            try
+                            {
+                                sqlCommand.Parameters.AddWithValue("@symbol", symbol);
+                                DataTable symbolsTable = new DataTable();
+                                MysqlDataAdapter.Fill(symbolsTable);
+
+                                Log(msg: "finished", guiUpdate: () =>
+                                {
+                                    SymbolsList.DisplayMemberPath = "symbol_short";
+                                    SymbolsList.SelectedValuePath = "symbol_short";
+                                    SymbolsList.ItemsSource = symbolsTable.DefaultView;
+                                });
+                            }
+                            catch (NullReferenceException e)
+                            {
+
+                            }
+                            finally
+                            {
+                                connection.Close();
+                            }
+
+
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log(null, $"Exception: {ex}");
+                    }
+                    finally
+                    {
+                        symbolListLoading = false;
+                        Log($"All data for {symbol} loaded", guiUpdate: () => { SymbolsList.IsEnabled = true; });
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+            finally
+            {
+                symbolListLoading = false;
+            }
+
+        }
+
+        private void ShowPosition()
+        {
+            try
+            {
+                Log(msg: "...");
+
+                string query = "SELECT close_pos as POS FROM positions where symbol = @symbol and date = (SELECT max(date) FROM positions where symbol = @symbol) ;";
+
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+                using (MysqlDataAdapter)
+                {
+                    sqlCommand.Parameters.AddWithValue("@symbol", symbol);
+
+                    //SelectedSymbol = SymbolsList.SelectedValue.ToString();
+
+                    DataTable positionsTable = new DataTable();
+                    MysqlDataAdapter.Fill(positionsTable);
+
+                    Log(msg: "finished", guiUpdate: () =>
+                    {
+                        PositionsValue.DisplayMemberPath = "POS";
+                        PositionsValue.SelectedValuePath = "POS";
+                        PositionsValue.ItemsSource = positionsTable.DefaultView;
+                    });
+
+                    // PositionLBL.Content = MysqlDataAdapter.Fill(positionsTable).ToString();
+
+
+                    //ShowCash();
+                    //ShowTodayTrades();
+                    //ShowTodayQuantity();
+                    //ShowTodayPrice();
+                }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+
+
+        private void ShowCash()
+        {
+            try
+            {
+                Log(msg: "...");
+
+                string query = "SELECT close_cash as CASH FROM cash where symbol = @symbol and date = (SELECT max(date) FROM cash where symbol = @symbol) ;";
+
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+                using (MysqlDataAdapter)
+                {
+                    sqlCommand.Parameters.AddWithValue("@symbol", symbol);
+
+                    DataTable cashTable = new DataTable();
+                    MysqlDataAdapter.Fill(cashTable);
+
+                    Log(msg: "finished", guiUpdate: () =>
+                    {
+                        CashValue.DisplayMemberPath = "CASH";
+                        CashValue.SelectedValuePath = "CASH";
+                        CashValue.ItemsSource = cashTable.DefaultView;
+                    });
+                }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+        }
+
+
+        private void ShowTodayTrades()
+        {
+            try
+            {
+                Log(msg: "...");
+
+                string query = "SELECT gross_amount FROM algotrade.trades where symbol = @symbol and date = (SELECT max(date) FROM trades where symbol = @symbol);";
+
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+                using (MysqlDataAdapter)
+                {
+                    sqlCommand.Parameters.AddWithValue("@symbol", symbol);
+
+                    DataTable tradesTable = new DataTable();
+                    MysqlDataAdapter.Fill(tradesTable);
+
+                    Log(msg: "finished", guiUpdate: () =>
+                    {
+                        TodayTradesValue.DisplayMemberPath = "gross_amount";
+                        TodayTradesValue.SelectedValuePath = "gross_amount";
+                        TodayTradesValue.ItemsSource = tradesTable.DefaultView;
+                    });
+                }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+        }
+
+        private void ShowTodayQuantity()
+        {
+            try
+            {
+                Log(msg: "...");
+
+                string query = "SELECT quantity FROM algotrade.trades where symbol = @symbol  and date = (SELECT max(date) FROM trades where symbol = @symbol);";
+
+
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+                using (MysqlDataAdapter)
+                {
+                    sqlCommand.Parameters.AddWithValue("@symbol", symbol);
+
+                    DataTable tradesTable = new DataTable();
+                    MysqlDataAdapter.Fill(tradesTable);
+
+                    Log(msg: "finished", guiUpdate: () =>
+                    {
+                        QuantityValue.DisplayMemberPath = "quantity";
+                        QuantityValue.SelectedValuePath = "quantity";
+                        QuantityValue.ItemsSource = tradesTable.DefaultView;
+                    });
+
+                }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+        }
+
+        private void ShowTodayPrice()
+        {
+            try
+            {
+                Log(msg: "...");
+                string query = "SELECT price FROM algotrade.trades where symbol = @symbol  and date = (SELECT max(date) FROM trades where symbol = @symbol);";
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+                using (MysqlDataAdapter)
+                {
+                    sqlCommand.Parameters.AddWithValue("@symbol", symbol);
+
+                    DataTable tradesTable = new DataTable();
+                    MysqlDataAdapter.Fill(tradesTable);
+
+                    Log(msg: "finished", guiUpdate: () =>
+                    {
+                        PriceValue.DisplayMemberPath = "price";
+                        PriceValue.SelectedValuePath = "price";
+                        PriceValue.ItemsSource = tradesTable.DefaultView;
+                    });
+
+                }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+        }
+
+
+        private void ShowTrades()
+        {
+            try
+            {
+                Log(msg: "...");
+                string query = "SELECT date, Symbol, quantity, price, settlement_amount as amount FROM algotrade.trades where symbol = @symbol order by date desc;";
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+                using (MysqlDataAdapter)
+                {
+                    sqlCommand.Parameters.AddWithValue("@symbol", symbol);
+
+                    DataTable tradesTable = new DataTable();
+                    MysqlDataAdapter.Fill(tradesTable);
+
+                    Log(msg: "finished", guiUpdate: () => { Show_Trades.ItemsSource = tradesTable.DefaultView; });
+
+                }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+        }
+
+        private void ShowPositions()
+        {
+            try
+            {
+                Log(msg: "...");
+
+                string query = "SELECT date, Symbol, open_pos, day_trade, close_pos FROM algotrade.positions where symbol = @symbol order by date desc;";
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+                using (MysqlDataAdapter)
+                {
+                    sqlCommand.Parameters.AddWithValue("@symbol", symbol);
+
+                    DataTable tradesTable = new DataTable();
+                    MysqlDataAdapter.Fill(tradesTable);
+
+                    Log(msg: "finished", guiUpdate: () => { Show_POS.ItemsSource = tradesTable.DefaultView; });
+
+                }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+        }
+
+        private void ShowBuy()
+        {
+            try
+            {
+                Log(msg: "...");
+                string query = $"SELECT count(*) as Buy FROM algotrade.factdata where symbol = @symbol and act = 'Buy' " +
+                               $"and date between'{start:yyyy-MM-dd}' and '{end:yyyy-MM-dd}';";
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+                using (MysqlDataAdapter)
+                {
+                    sqlCommand.Parameters.AddWithValue("@symbol", symbol);
+
+                    DataTable tradesTable = new DataTable();
+                    MysqlDataAdapter.Fill(tradesTable);
+
+                    Log(msg: "finished", guiUpdate: () =>
+                    {
+                        BuyValue.DisplayMemberPath = "Buy";
+                        BuyValue.SelectedValuePath = "Buy";
+                        BuyValue.ItemsSource = tradesTable.DefaultView;
+                    });
+
+                }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+        }
+
+        private void ShowSell()
+        {
+            try
+            {
+                Log(msg: "...");
+                string query = $"SELECT count(*) as Sell FROM algotrade.factdata where symbol = @symbol and act = 'Sell' " +
+                               $"and date between '{start:yyyy-MM-dd}' and '{end:yyyy-MM-dd}';";
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+                using (MysqlDataAdapter)
+                {
+                    sqlCommand.Parameters.AddWithValue("@symbol", symbol);
+
+                    DataTable tradesTable = new DataTable();
+                    MysqlDataAdapter.Fill(tradesTable);
+
+                    Log(msg: "finished", guiUpdate: () =>
+                    {
+                        SellValue.DisplayMemberPath = "Sell";
+                        SellValue.SelectedValuePath = "Sell";
+                        SellValue.ItemsSource = tradesTable.DefaultView;
+                    });
+                }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+        }
+
+        //private void ShowFactData()
+        //{
+
+        //    try
+        //    {
+        //        Log(msg: "...");
+        //        string query = "SELECT date, Symbol, lastprice, ACT FROM algotrade.factdata where symbol = @symbol and date between'"+ sd +"' and '"+ ed +"' order by date desc;";
+        //        MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+        //        MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+        //        using (MysqlDataAdapter)
+        //        {
+        //            sqlCommand.Parameters.AddWithValue("@symbol", symbol);
+
+        //            DataTable tradesTable = new DataTable();
+        //            MysqlDataAdapter.Fill(tradesTable);
+
+        //            Log(msg: "finished", guiUpdate: () => { Show_FactData.ItemsSource = tradesTable.DefaultView; });
+
+        //        }
+
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        MessageBox.Show(e.ToString());
+        //    }
+
+        //}
+
+        private void ShowDailyCash()
+        {
+            try
+            {
+                Log(msg: "...");
+
+                string query = "SELECT date, Symbol, open_cash, day_cash, close_cash FROM algotrade.cash where symbol = @symbol order by date desc;";
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+                using (MysqlDataAdapter)
+                {
+                    sqlCommand.Parameters.AddWithValue("@symbol", symbol);
+
+                    DataTable tradesTable = new DataTable();
+                    MysqlDataAdapter.Fill(tradesTable);
+
+                    Log(msg: "finished", guiUpdate: () => { Show_Daily_Cash.ItemsSource = tradesTable.DefaultView; });
+
+                }
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+
+        }
+
+
+        private void AddSymbol()
+        {
+
+            ValidateSymbol();
+
+            if (status)
+            {
+                try
+                {
+                    //string query = "insert into algotrade.static (`symbol_name`,`symbol_short`,`status`) values(" +
+                    //    "(SELECT distinct `Security Name` FROM `algotrade`.`symbols`" +
+                    //    " where `Symbol` = @symbol_short), @symbol_short, 'A');";
+                    string query = "call AddSymbol(@symbol_short)";
+
+                    MySqlCommand sqlCommand1 = new MySqlCommand(query, connection);
+                    MySqlDataAdapter MysqlDataAdapter1 = new MySqlDataAdapter(sqlCommand1);
+
+                    using (MysqlDataAdapter1)
+                    {
+                        sqlCommand1.Parameters.AddWithValue("@symbol_short", Symbol.Text.ToUpper());
+
+                        DataTable symbolsTable = new DataTable();
+                        MysqlDataAdapter1.Fill(symbolsTable);
+                        SymbolsList.DisplayMemberPath = "symbol_short";
+                        SymbolsList.SelectedValuePath = "symbol_short";
+                        SymbolsList.ItemsSource = symbolsTable.DefaultView;
+
+                    }
+                    Symbol.Clear();
+                }
+                catch (MySqlException e)
+                {
+                    MessageBox.Show("Entry already exists!");
+                }
+            }
+
+            else
+            {
+                MessageBox.Show("Enter valid symbol!");
+            }
+        }
+
+
+        private void ValidateSymbol()
+        {
+            status = false;
+            TradeProcessor tp = new TradeProcessor();
+
+            MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+            MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+            using (MysqlDataAdapter)
+            {
+                sqlCommand.Parameters.AddWithValue("@symbol", Symbol.Text.ToString());
+
+                try
+                {
+                    SelectedSymbol = Symbol.Text.ToString();
+                }
+                catch (NullReferenceException e)
+                {
+                    MessageBox.Show("Please select Symbol");
+                }
+
+                string query = "SELECT count(distinct `SecurityName`) FROM `algotrade`.`symbols`" +
+                                 " where `Symbol` = '" + SelectedSymbol + "' ;";
+
+                if (tp.DBA(query) > 0)
+                {
+                    status = true;
+                }
+            }
+        }
+
+
+        private void RemoveSymbol()
+        {
+            try
+            {
+                string query = "call RemoveSymbol('" + @symbol + "')";
+
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                //  MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+
+                connection.Open();
+                sqlCommand.Parameters.AddWithValue("@symbol", SymbolsList.SelectedValue);
+                sqlCommand.ExecuteScalar();
+                connection.Close();
+                ShowSymbolsList();
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+            finally
+            {
+                MessageBox.Show("Symbol " + @symbol + " removed OK");
+            }
+
+        }
+
+        public void CleanData(string SelectedSymbol)
+        {
+            try
+            {
+                //string query = "delete from algotrade.positions where symbol ='" + SelectedSymbol + "';" +
+                //                "delete from algotrade.cash where symbol ='" + SelectedSymbol + "';" +
+                //                "delete from algotrade.trades where symbol = '" + SelectedSymbol + "';" +
+                //                "INSERT INTO algotrade.positions  (date, symbol, open_pos, day_trade, close_pos) VALUES ((select date_sub(min(date), interval 1 day) from algotrade.factdata where symbol = '" + SelectedSymbol + "'), '" + SelectedSymbol + "', '0', '0', '0'); " +
+                //                "INSERT INTO algotrade.cash (symbol, date, currency, account, open_cash, day_cash, close_cash) VALUES ('" + SelectedSymbol + "', (select date_sub(min(date), interval 1 day) from algotrade.factdata where symbol = '" + SelectedSymbol + "'), 'USD', 'ACC', '0', '0', '0');";
+
+                string query = "call _sp_CleanData('" + SelectedSymbol + "')";
+
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                //  MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+
+                connection.Open();
+                //sqlCommand.Parameters.AddWithValue("@symbol", SymbolsList.SelectedValue);
+                sqlCommand.ExecuteScalar();
+                connection.Close();
+                ShowSymbolsList();
+
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+        }
+
+
+
+        public async Task YFinance()
+
+
+        {
+            //TradeProcessor tp = new TradeProcessor();
+
+            query = @"SELECT symbol_short FROM algotrade.static where status = 'A'; ";
+            DbCallSymbols(query);
+
+            Yahoo.IgnoreEmptyRows = true;
+            MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+            MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+            for (int i = 0; i < mySymbols.Count; i++)
+            {
+
+                SelectedSymbol = (string)mySymbols[i]; // setting property for currently processing symbol
+
+                //    using (MysqlDataAdapter)
+                //{
+
+
+                //    try
+                //    {
+                //        sqlCommand.Parameters.AddWithValue("@symbol", SymbolsList.SelectedValue.ToString());
+                //        SelectedSymbol = SymbolsList.SelectedValue.ToString();
+                //    }
+                //    catch(NullReferenceException e)
+                //    {
+                //        MessageBox.Show("Please select Symbol");
+                //    }
+                //}
+
+
+                //var history = await Yahoo.GetHistoricalAsync(SelectedSymbol, StartDate.SelectedDate.Value, EndDate.SelectedDate.Value, Period.Daily);
+                var history = await Yahoo.GetHistoricalAsync(SelectedSymbol, start, end, Period.Daily);
+                string query1 = "delete from algotrade.factdata where symbol = '" + SelectedSymbol + "'; ";
+                string query2;
+
+
+                DatabaseCalls(query1);
+
+                try
+                {
+
+                    foreach (var candle in history)
+                    {
+                        string date = String.Format("{0:yyyy-MM-dd}", candle.DateTime);
+                        //query = "INSERT INTO algotrade.factdata (date,Symbol,open, high, low,lastPrice, volume, Currency)  VALUES ('" + date + "' ,'" + SelectedSymbol.ToString() + "', " + candle.Open + ", " + candle.High + " , " + candle.Low + " ," + candle.Close + " , " + candle.Volume + ", 'USD')";
+                        query = "call _sp_FactDataHydrate('" + date + "' ,'" + SelectedSymbol.ToString() + "', " + candle.Open + ", " + candle.High + " , " + candle.Low + " ," + candle.Close + " , " + candle.Volume + ")";
+
+                        DatabaseCalls(query);
+                        //Console.WriteLine(query);
+                    }
+
+                    query2 = "create or replace view DMA_50 as SELECT date, symbol,AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc; " +
+                            "create or replace view DMA_200 as SELECT date, symbol, AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 200 PRECEDING AND 0 FOLLOWING ) DMA_200 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc;";
+
+
+                    string query3 = "call _sp_DMACalculation()";
+
+                    DatabaseCalls(query2);
+                    DatabaseCalls(query3);
+
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.ToString());
+                }
+                finally
+                {
+
+                    DatabaseCalls(sproc);
+                    CleanData(SelectedSymbol);
+
+                }
+
+            }
+            MessageBox.Show("Static Data for refreshed!!!");
+        }
+
+        public void DatabaseCalls(string query)
+        {
+
+            //  Console.WriteLine(query);
+            try
+            {
+
+
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.ExecuteScalar();
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+            finally
+            {
+
+            }
+
+        }
+
+        private volatile bool loading;
+        private string symbol;
+
+        private void SymbolsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (loading || SymbolsList.SelectedValue == null)
+                return;
+
+            loading = true;
+            SymbolsList.IsEnabled = false;
+
+            symbol = SymbolsList.SelectedValue.ToString();
+
+            Task.Factory.StartNew(() =>
+            {
+                try
+                {
+                    Log($"Loading data for {symbol}...");
+                    ShowPosition();
+                    ShowCash();
+                    ShowTodayTrades();
+                    ShowTodayQuantity();
+                    ShowTodayPrice();
+                    ShowTrades();
+                    ShowPositions();
+                    ShowDailyCash();
+                    //ShowFactData();
+                    ShowBuy();
+                    ShowSell();
+                }
+                catch (Exception ex)
+                {
+                    Log(null, $"Exception loading data for {symbol}: {ex}");
+                }
+                finally
+                {
+                    loading = false;
+                    Log($"All data for {symbol} loaded", guiUpdate: () => { SymbolsList.IsEnabled = true; });
+                }
+            });
+        }
+
+        private void Log([System.Runtime.CompilerServices.CallerMemberName] string callerName = "",
+            string msg = null,
+            Action guiUpdate = null)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                LogList.Items.Add($"{DateTime.Now:hh:mm:ss}: {callerName} {msg}");
+                guiUpdate?.Invoke();
+                try
+                {
+                    var border = (Border)VisualTreeHelper.GetChild(LogList, 0);
+                    var scrollViewer = (ScrollViewer)VisualTreeHelper.GetChild(border, 0);
+                    scrollViewer.ScrollToBottom();
+                }
+                catch
+                {
+
+                }
+
+            }), DispatcherPriority.Background);
+        }
+
+        private void RemoveSymbol(object sender, RoutedEventArgs e)
+        {
+            RemoveSymbol();
+            ShowSymbolsList();
+        }
+
+        private void RefreshSymbols(object sender, RoutedEventArgs e)
+        {
+            ShowSymbolsList();
+        }
+
+        private async void RefreshData(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await YFinance();
+            }
+            catch (Exception ae)
+            {
+                MessageBox.Show(ae.ToString());
+                MessageBox.Show("Select symbol to refresh");
+            }
+        }
+
+        private void Add_Symbol(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                AddSymbol();
+
+            }
+            catch
+            {
+                MessageBox.Show("Incorrect symbol");
+            }
+            finally
+            {
+                ShowSymbolsList();
+            }
+        }
+
+        private async void Process_Trade(object sender, RoutedEventArgs e)
+        {
+            TradeProcessor tradeProcessor = new TradeProcessor();
+            //CleanData(SelectedSymbol);
+            // Task task = Task.Run(() =>
+
+            tradeProcessor.TradeExecute(start, end);
+            //);
+            //  await task;
+            ShowSymbolsList();
+        }
+
+        public void DateValidator(string ed)
+        {
+            DateTime today = new DateTime();
+
+            if (Convert.ToDateTime(ed) > today)
+            {
+                ed = String.Format("{0:yyyy-MM-dd}", today);
+                // MessageBox.Show(ed);
+            }
+            else
+            {
+                //  MessageBox.Show(ed);
+            }
+        }
+        public void DbCallSymbols(string query)
+        {
+
+            try
+            {
+                MySqlCommand comm = new MySqlCommand(query, connection);
+                connection.Open();
+
+                MySqlDataReader reader = comm.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    mySymbols.Insert(0, reader.GetValue(0));
+                }
+                reader.Close();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+        }
+
+        private void StartDate_OnSelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!StartDate.SelectedDate.HasValue)
+                return;
+
+            start = StartDate.SelectedDate.Value;
+        }
+
+        private void EndDate_OnSelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!EndDate.SelectedDate.HasValue)
+                return;
+
+            end = EndDate.SelectedDate.Value;
+        }
+    }
+}
