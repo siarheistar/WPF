@@ -491,6 +491,12 @@
           "lib/net45/Newtonsoft.Json.dll": {}
         }
       },
+      "SecurityCodeScan/3.5.3": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System"
+        ]
+      },
       "SSH.NET/2016.1.0": {
         "type": "package",
         "compile": {
@@ -1105,6 +1111,12 @@
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
         }
+      },
+      "SecurityCodeScan/3.5.3": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System"
+        ]
       },
       "SSH.NET/2016.1.0": {
         "type": "package",
@@ -1721,6 +1733,12 @@
           "lib/net45/Newtonsoft.Json.dll": {}
         }
       },
+      "SecurityCodeScan/3.5.3": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System"
+        ]
+      },
       "SSH.NET/2016.1.0": {
         "type": "package",
         "compile": {
@@ -2335,6 +2353,12 @@
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
         }
+      },
+      "SecurityCodeScan/3.5.3": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System"
+        ]
       },
       "SSH.NET/2016.1.0": {
         "type": "package",
@@ -3127,6 +3151,22 @@
         "newtonsoft.json.nuspec"
       ]
     },
+    "SecurityCodeScan/3.5.3": {
+      "sha512": "+dLvN7an6babMALHuhXqh0P8T8UrhWL0Vr0f2gIDyNETO7LFvIvR9gbLVON0BMAAtWE7tCOdp02XgTDzg9P6vg==",
+      "type": "package",
+      "path": "securitycodescan/3.5.3",
+      "hasTools": true,
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "analyzers/dotnet/SecurityCodeScan.dll",
+        "analyzers/dotnet/YamlDotNet.dll",
+        "securitycodescan.3.5.3.nupkg.sha512",
+        "securitycodescan.nuspec",
+        "tools/install.ps1",
+        "tools/uninstall.ps1"
+      ]
+    },
     "SSH.NET/2016.1.0": {
       "sha512": "b0fcFFOE044KNRhq1uGujmK04ab+OzA9xARdeVCoZrY6I4D1IIaR6dn6qBIa+er4bJapGBhznDitwcRQpSRC0w==",
       "type": "package",
@@ -3469,6 +3509,7 @@
     ".NETFramework,Version=v4.6.2": [
       "Auth0.OidcClient.WPF >= 3.1.7",
       "MySql.Data >= 8.0.21",
+      "SecurityCodeScan >= 3.5.3",
       "YahooFinanceApi >= 2.1.2"
     ]
   },
@@ -3517,6 +3558,12 @@
           "MySql.Data": {
             "target": "Package",
             "version": "[8.0.21, )"
+          },
+          "SecurityCodeScan": {
+            "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[3.5.3, )"
           },
           "YahooFinanceApi": {
             "target": "Package",

@@ -46,6 +46,12 @@
               "target": "Package",
               "version": "[8.0.21, )"
             },
+            "SecurityCodeScan": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.5.3, )"
+            },
             "YahooFinanceApi": {
               "target": "Package",
               "version": "[2.1.2, )"

@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# SCS0025: Odbc API: SQL injection possible in {1} argument passed to '{0}'
+dotnet_diagnostic.SCS0025.severity = warning
+
+# SCS0036: Possible SQL injection in {1} argument passed to '{0}'
+dotnet_diagnostic.SCS0036.severity = warning

@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Data;
-//using MySqlConnector;
 using MySql.Data.MySqlClient;
 using YahooFinanceApi;
 using trading_WPF.Trading;
@@ -17,23 +16,13 @@ namespace trading_WPF
 
     public partial class MainWindow : Window
     {
-
-        private MySqlConnection connection;
-        private string server;
-        private string database;
-        private string user;
-        private string password;
-        private string port;
-        private string connectionString;
-        private string sslM;
+        private readonly MySqlConnection connection;
+        private readonly string connectionString;
         public string SelectedSymbol;
         string query;
-
         bool status = false;
         ArrayList mySymbols = new ArrayList();
-
-        string sproc = "call ACT();";
-
+        readonly string sproc = "call _sp_ACT();";
         private DateTime start;
         private DateTime end;
 
@@ -48,8 +37,6 @@ namespace trading_WPF
             EndDate.SelectedDate = DateTime.Today.AddDays(-1);
             start = StartDate.SelectedDate.Value;
             end = EndDate.SelectedDate.Value;
-
-            //connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
             connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
             connection = new MySqlConnection(connectionString);
 
@@ -81,8 +68,6 @@ namespace trading_WPF
 
                         using (MysqlDataAdapter)
                         {
-
-
                             try
                             {
                                 sqlCommand.Parameters.AddWithValue("@symbol", symbol);
@@ -96,16 +81,13 @@ namespace trading_WPF
                                     SymbolsList.ItemsSource = symbolsTable.DefaultView;
                                 });
                             }
-                            catch (NullReferenceException e)
+                            catch //(NullReferenceException e)
                             {
-
                             }
                             finally
                             {
                                 connection.Close();
                             }
-
-
                         }
                     }
                     catch (Exception ex)
@@ -207,8 +189,6 @@ namespace trading_WPF
             }
 
         }
-
-
         private void ShowTodayTrades()
         {
             try
@@ -505,10 +485,7 @@ namespace trading_WPF
             {
                 try
                 {
-                    //string query = "insert into algotrade.static (`symbol_name`,`symbol_short`,`status`) values(" +
-                    //    "(SELECT distinct `Security Name` FROM `algotrade`.`symbols`" +
-                    //    " where `Symbol` = @symbol_short), @symbol_short, 'A');";
-                    string query = "call AddSymbol(@symbol_short)";
+                    string query = "call _sp_AddSymbol(@symbol_short)";
 
                     MySqlCommand sqlCommand1 = new MySqlCommand(query, connection);
                     MySqlDataAdapter MysqlDataAdapter1 = new MySqlDataAdapter(sqlCommand1);
@@ -526,7 +503,7 @@ namespace trading_WPF
                     }
                     Symbol.Clear();
                 }
-                catch (MySqlException e)
+                catch //(MySqlException e)
                 {
                     MessageBox.Show("Entry already exists!");
                 }
@@ -554,13 +531,15 @@ namespace trading_WPF
                 {
                     SelectedSymbol = Symbol.Text.ToString();
                 }
-                catch (NullReferenceException e)
+                catch  //NullReferenceException e
                 {
                     MessageBox.Show("Please select Symbol");
                 }
 
                 string query = "SELECT count(distinct `SecurityName`) FROM `algotrade`.`symbols`" +
-                                 " where `Symbol` = '" + SelectedSymbol + "' ;";
+                //" where `Symbol` = '@SelectedSymbol' ;";
+                " where `Symbol` = '" + SelectedSymbol + "' ;";
+
 
                 if (tp.DBA(query) > 0)
                 {
@@ -574,12 +553,9 @@ namespace trading_WPF
         {
             try
             {
-                string query = "call RemoveSymbol('" + @symbol + "')";
+                string query = "call _sp_RemoveSymbol('" + @symbol + "')";
 
                 MySqlCommand sqlCommand = new MySqlCommand(query, connection);
-                //  MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
-
-
                 connection.Open();
                 sqlCommand.Parameters.AddWithValue("@symbol", SymbolsList.SelectedValue);
                 sqlCommand.ExecuteScalar();
@@ -601,21 +577,11 @@ namespace trading_WPF
         public void CleanData(string SelectedSymbol)
         {
             try
-            {
-                //string query = "delete from algotrade.positions where symbol ='" + SelectedSymbol + "';" +
-                //                "delete from algotrade.cash where symbol ='" + SelectedSymbol + "';" +
-                //                "delete from algotrade.trades where symbol = '" + SelectedSymbol + "';" +
-                //                "INSERT INTO algotrade.positions  (date, symbol, open_pos, day_trade, close_pos) VALUES ((select date_sub(min(date), interval 1 day) from algotrade.factdata where symbol = '" + SelectedSymbol + "'), '" + SelectedSymbol + "', '0', '0', '0'); " +
-                //                "INSERT INTO algotrade.cash (symbol, date, currency, account, open_cash, day_cash, close_cash) VALUES ('" + SelectedSymbol + "', (select date_sub(min(date), interval 1 day) from algotrade.factdata where symbol = '" + SelectedSymbol + "'), 'USD', 'ACC', '0', '0', '0');";
-
+            {               
                 string query = "call _sp_CleanData('" + SelectedSymbol + "')";
 
                 MySqlCommand sqlCommand = new MySqlCommand(query, connection);
-                //  MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
-
-
                 connection.Open();
-                //sqlCommand.Parameters.AddWithValue("@symbol", SymbolsList.SelectedValue);
                 sqlCommand.ExecuteScalar();
                 connection.Close();
                 ShowSymbolsList();
@@ -646,78 +612,64 @@ namespace trading_WPF
             Yahoo.IgnoreEmptyRows = true;
             MySqlCommand sqlCommand = new MySqlCommand(query, connection);
             MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
-            for (int i = 0; i < mySymbols.Count; i++)
+
+
+            if (mySymbols.Count >= 1 && mySymbols.Count <= Int32.MaxValue) // This code is to check Integer overflow
             {
-
-                SelectedSymbol = (string)mySymbols[i]; // setting property for currently processing symbol
-
-                //    using (MysqlDataAdapter)
-                //{
-
-
-                //    try
-                //    {
-                //        sqlCommand.Parameters.AddWithValue("@symbol", SymbolsList.SelectedValue.ToString());
-                //        SelectedSymbol = SymbolsList.SelectedValue.ToString();
-                //    }
-                //    catch(NullReferenceException e)
-                //    {
-                //        MessageBox.Show("Please select Symbol");
-                //    }
-                //}
-
-
-                //var history = await Yahoo.GetHistoricalAsync(SelectedSymbol, StartDate.SelectedDate.Value, EndDate.SelectedDate.Value, Period.Daily);
-                var history = await Yahoo.GetHistoricalAsync(SelectedSymbol, start, end, Period.Daily);
-                string query1 = "delete from algotrade.factdata where symbol = '" + SelectedSymbol + "'; ";
-                string query2;
-
-
-                DatabaseCalls(query1);
-
-                try
+                for (int i = 0; i < mySymbols.Count; i++) 
                 {
 
-                    foreach (var candle in history)
-                    {
-                        string date = String.Format("{0:yyyy-MM-dd}", candle.DateTime);
-                        //query = "INSERT INTO algotrade.factdata (date,Symbol,open, high, low,lastPrice, volume, Currency)  VALUES ('" + date + "' ,'" + SelectedSymbol.ToString() + "', " + candle.Open + ", " + candle.High + " , " + candle.Low + " ," + candle.Close + " , " + candle.Volume + ", 'USD')";
-                        query = "call _sp_FactDataHydrate('" + date + "' ,'" + SelectedSymbol.ToString() + "', " + candle.Open + ", " + candle.High + " , " + candle.Low + " ," + candle.Close + " , " + candle.Volume + ")";
+                    SelectedSymbol = (string)mySymbols[i]; // setting property for currently processing symbol
+                                        
+                    var history = await Yahoo.GetHistoricalAsync(SelectedSymbol, start, end, Period.Daily);
+                    string query1 = "delete from algotrade.factdata where symbol = '" + SelectedSymbol + "'; ";
+                    string query2;
 
-                        DatabaseCalls(query);
-                        //Console.WriteLine(query);
+
+                    DatabaseCalls(query1);
+
+                    try
+                    {
+
+                        foreach (var candle in history)
+                        {
+                            string date = String.Format("{0:yyyy-MM-dd}", candle.DateTime);
+                            query = "call _sp_FactDataHydrate('" + date + "' ,'" + SelectedSymbol.ToString() + "', " + candle.Open + ", " + candle.High + " , " + candle.Low + " ," + candle.Close + " , " + candle.Volume + ")";
+
+                            DatabaseCalls(query);
+                        }
+
+                        query2 = "create or replace view DMA_50 as SELECT date, symbol,AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc; " +
+                                "create or replace view DMA_200 as SELECT date, symbol, AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 200 PRECEDING AND 0 FOLLOWING ) DMA_200 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc;";
+
+
+                        string query3 = "call _sp_DMACalculation()";
+
+                        DatabaseCalls(query2);
+                        DatabaseCalls(query3);
+
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.ToString());
+                    }
+                    finally
+                    {
+                        DatabaseCalls(sproc);
+                        CleanData(SelectedSymbol);
                     }
 
-                    query2 = "create or replace view DMA_50 as SELECT date, symbol,AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc; " +
-                            "create or replace view DMA_200 as SELECT date, symbol, AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 200 PRECEDING AND 0 FOLLOWING ) DMA_200 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc;";
-
-
-                    string query3 = "call _sp_DMACalculation()";
-
-                    DatabaseCalls(query2);
-                    DatabaseCalls(query3);
-
                 }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.ToString());
-                }
-                finally
-                {
-
-                    DatabaseCalls(sproc);
-                    CleanData(SelectedSymbol);
-
-                }
-
+                MessageBox.Show("Static Data for refreshed!!!");
             }
-            MessageBox.Show("Static Data for refreshed!!!");
+            else
+            {
+                MessageBox.Show("No Symbols added in list. Please Add more symbols");
+            }
         }
 
         public void DatabaseCalls(string query)
         {
-
-            //  Console.WriteLine(query);
             try
             {
 
@@ -851,12 +803,7 @@ namespace trading_WPF
         private async void Process_Trade(object sender, RoutedEventArgs e)
         {
             TradeProcessor tradeProcessor = new TradeProcessor();
-            //CleanData(SelectedSymbol);
-            // Task task = Task.Run(() =>
-
             tradeProcessor.TradeExecute(start, end);
-            //);
-            //  await task;
             ShowSymbolsList();
         }
 
@@ -867,11 +814,9 @@ namespace trading_WPF
             if (Convert.ToDateTime(ed) > today)
             {
                 ed = String.Format("{0:yyyy-MM-dd}", today);
-                // MessageBox.Show(ed);
             }
             else
             {
-                //  MessageBox.Show(ed);
             }
         }
         public void DbCallSymbols(string query)

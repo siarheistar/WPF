@@ -1,14 +1,9 @@
 ﻿using MySql.Data.MySqlClient;
-using MySqlX.XDevAPI.Relational;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace trading_WPF.Trading
@@ -37,21 +32,13 @@ namespace trading_WPF.Trading
         string QueryDates;
         string buy_update;
         string sell_update;
-        public Int32 yyyy;
-        public Int32 mm;
-        public Int32 dd;
-        TradeProcessor[] allRecords = null;
-        List<string> str = new List<string>();
-        ArrayList myList = new ArrayList();
         ArrayList mySymbols = new ArrayList();
         ArrayList myDates = new ArrayList();
 
         public TradeProcessor()
         {
             connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
-
             connection = new MySqlConnection(connectionString);
-
         }
 
 
@@ -62,118 +49,119 @@ namespace trading_WPF.Trading
             query = @"SELECT symbol_short FROM algotrade.static where status = 'A'; ";
             DbCallSymbols(query);
 
-            // Loop for symbols to frocess
-            for (int i = 0; i < mySymbols.Count; i++)
+            if (mySymbols.Count >= 1 && mySymbols.Count <= Int32.MaxValue) // This code is to check Integer overflow
             {
 
-                Symbol = (string)mySymbols[i]; // setting property for currently processing symbol
-                //CleanData(Symbol);
-                string CleanData = "call _sp_CleanData('"+Symbol+"')";
-                
-                Console.WriteLine(CleanData);
-
-        //        mw.DatabaseCalls(CleanData);
-
-                QueryDates = $"select date from algotrade.factdata where date between '{start:yyyy-MM-dd}' and '{end:yyyy-MM-dd}'";
-
-                try
+                // Loop for symbols to frocess
+                for (int i = 0; i < mySymbols.Count; i++)
                 {
-                    MySqlCommand comm = new MySqlCommand(QueryDates, connection);
-                    connection.Open();
 
-                    MySqlDataReader reader = comm.ExecuteReader();
+                    Symbol = (string)mySymbols[i]; // setting property for currently processing symbol
+                                                   //CleanData(Symbol);
+                    string CleanData = "call _sp_CleanData('" + Symbol + "')";
 
-                    while (reader.Read())
+                    Console.WriteLine(CleanData);
+
+                    //        mw.DatabaseCalls(CleanData);
+
+                    QueryDates = $"select date from algotrade.factdata where date between '{start:yyyy-MM-dd}' and '{end:yyyy-MM-dd}'";
+
+                    try
                     {
-                        myDates.Insert(0, reader.GetValue(0));
-                    }
+                        MySqlCommand comm = new MySqlCommand(QueryDates, connection);
+                        connection.Open();
 
-                    //reader.Close();
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-                finally
-                {
-                    connection.Close();
-                }
+                        MySqlDataReader reader = comm.ExecuteReader();
 
-                // Define nearest start and end dates
-                string query_sdate = $"SELECT date FROM algotrade.factdata WHERE date >= '{start:yyyy-MM-dd}' and date <= NOW() and Symbol = '" + Symbol + "' ORDER BY date LIMIT 1;";
-                string query_ed = "SELECT date FROM algotrade.factdata WHERE date >= (select max(date) from algotrade.factdata where Symbol = '" + Symbol + "') and date <= NOW() and Symbol = '" + Symbol + "' ORDER BY date LIMIT 1;";
-                var startdate = Convert.ToDateTime(DbCallDate(query_sdate));
-                var enddate = Convert.ToDateTime(DbCallDate(query_ed));
-
-                
-
-                foreach (DateTime day in EachCalendarDay(startdate, enddate))
-                {
-                    if (myDates.Contains(day))
-                    {
-
-                        trade_date = String.Format("{0:yyyy-MM-dd}", day);
-
-                        query1 = @"SELECT date, symbol, lastPrice, DMA_50, DMA_200, ACT FROM algotrade.factdata where symbol = '" + Symbol + "' and date = '" + String.Format("{0:yyyy-MM-dd}", day) + "';";
-
-                        DbCall(query1);
-
-
-                        if (act.Equals("Buy"))
+                        while (reader.Read())
                         {
-                            try
-                            {
-                                buy_update = "call _sp_BuyUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "')";
-                                mw.DatabaseCalls(buy_update);
-                                pos_and_cash_calc();
-                                string PosAndCashUpdate = "call _sp_BuyPosAndCashUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "', '" + Math.Round(open_pos, 2) + "', '" + Math.Round(day_trade, 2) + "', '" + Math.Round(close_pos, 2) + "',  '" + Math.Round(open_cash, 2) + "', '" + Math.Round(day_cash, 2) + "', '" + Math.Round(close_cash, 2) + "')";
-                                mw.DatabaseCalls(PosAndCashUpdate);
-                            }
-                            catch (NullReferenceException e)
-                            {
-
-                            }
-                            finally
-                            {
-
-
-                            }
-
-
+                            myDates.Insert(0, reader.GetValue(0));
                         }
 
-                        else if (act.Equals("Sell"))
+                        //reader.Close();
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+
+                    // Define nearest start and end dates
+                    string query_sdate = $"SELECT date FROM algotrade.factdata WHERE date >= '{start:yyyy-MM-dd}' and date <= NOW() and Symbol = '" + Symbol + "' ORDER BY date LIMIT 1;";
+                    string query_ed = "SELECT date FROM algotrade.factdata WHERE date >= (select max(date) from algotrade.factdata where Symbol = '" + Symbol + "') and date <= NOW() and Symbol = '" + Symbol + "' ORDER BY date LIMIT 1;";
+                    var startdate = Convert.ToDateTime(DbCallDate(query_sdate));
+                    var enddate = Convert.ToDateTime(DbCallDate(query_ed));
+
+
+
+                    foreach (DateTime day in EachCalendarDay(startdate, enddate))
+                    {
+                        if (myDates.Contains(day))
                         {
-                            try
+
+                            trade_date = String.Format("{0:yyyy-MM-dd}", day);
+
+                            query1 = @"SELECT date, symbol, lastPrice, DMA_50, DMA_200, ACT FROM algotrade.factdata where symbol = '" + Symbol + "' and date = '" + String.Format("{0:yyyy-MM-dd}", day) + "';";
+
+                            DbCall(query1);
+
+
+                            if (act.Equals("Buy"))
                             {
-
-
-                                pos_and_cash_calc();
-                                if (open_pos >= 1)
+                                try
                                 {
-                                   sell_update = "call _sp_SellUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "')";
-                                   mw.DatabaseCalls(sell_update);
-                                   pos_and_cash_calc();
-                                   string PosAndCashUpdate = "call _sp_SellPosAndCashUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "', '" + Math.Round(open_pos, 2) + "', '" + Math.Round(day_trade, 2) + "', '" + Math.Round(close_pos, 2) + "',  '" + Math.Round(open_cash, 2) + "', '" + Math.Round(day_cash, 2) + "', '" + Math.Round(close_cash, 2) + "')";
-                                   mw.DatabaseCalls(PosAndCashUpdate);
+                                    buy_update = "call _sp_BuyUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "')";
+                                    mw.DatabaseCalls(buy_update);
+                                    pos_and_cash_calc();
+                                    string PosAndCashUpdate = "call _sp_BuyPosAndCashUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "', '" + Math.Round(open_pos, 2) + "', '" + Math.Round(day_trade, 2) + "', '" + Math.Round(close_pos, 2) + "',  '" + Math.Round(open_cash, 2) + "', '" + Math.Round(day_cash, 2) + "', '" + Math.Round(close_cash, 2) + "')";
+                                    mw.DatabaseCalls(PosAndCashUpdate);
+                                }
+                                catch //(NullReferenceException e)
+                                {
+
+                                }
+                                finally
+                                {
+
 
                                 }
 
-                            }
-                            catch (NullReferenceException e)
-                            {
 
                             }
-                            finally
+
+                            else if (act.Equals("Sell"))
                             {
+                                try
+                                {
 
 
+                                    pos_and_cash_calc();
+                                    if (open_pos >= 1)
+                                    {
+                                        sell_update = "call _sp_SellUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "')";
+                                        mw.DatabaseCalls(sell_update);
+                                        pos_and_cash_calc();
+                                        string PosAndCashUpdate = "call _sp_SellPosAndCashUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "', '" + Math.Round(open_pos, 2) + "', '" + Math.Round(day_trade, 2) + "', '" + Math.Round(close_pos, 2) + "',  '" + Math.Round(open_cash, 2) + "', '" + Math.Round(day_cash, 2) + "', '" + Math.Round(close_cash, 2) + "')";
+                                        mw.DatabaseCalls(PosAndCashUpdate);
+
+                                    }
+
+                                }
+                                catch //(NullReferenceException e)
+                                {
+
+                                }
+                                finally
+                                {
+                                }
                             }
                         }
-                    }
 
+                    }
                 }
-                
             }
 
             MessageBox.Show("Trade analysis completed!!!");
@@ -220,8 +208,6 @@ namespace trading_WPF.Trading
             day_trade = DBA(day);
             close_pos = open_pos + day_trade;
 
-
-
             if (close_pos < 0)
             {
                 open_pos = 0;
@@ -233,8 +219,6 @@ namespace trading_WPF.Trading
             open_cash = DBA(opn_cash_query);
             day_cash = DBA(day_cash_query);
             close_cash = open_cash + day_cash;
-
-
         }
 
 
@@ -336,6 +320,8 @@ namespace trading_WPF.Trading
             try
             {
                 MySqlCommand comm = new MySqlCommand(query, connection);
+                comm.Parameters.Add("@SelectedSymbol", (MySqlDbType)SqlDbType.NVarChar,5);
+
                 connection.Open();
 
                 MySqlDataReader reader = comm.ExecuteReader();
