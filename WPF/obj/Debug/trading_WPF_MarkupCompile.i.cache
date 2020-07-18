@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Project\12072020\WPF\obj\Debug\
+C:\Project\12072020\WPF\WPF\obj\Debug\
 trading_WPF
 none
 false
 DEBUG;TRACE
-C:\Project\12072020\WPF\App.xaml
+C:\Project\12072020\WPF\WPF\App.xaml
 2-1382245159
 
 81839850877
 256-764135935
 Auth0LogIn.xaml;MainWindow.xaml;
 
-False
+True
 

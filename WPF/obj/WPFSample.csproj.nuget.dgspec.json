@@ -1,0 +1,61 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\Sergei\\Downloads\\wpf-winforms-01-login (1)\\quickstart\\00-starter-seed\\WPF\\WPFSample.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\Sergei\\Downloads\\wpf-winforms-01-login (1)\\quickstart\\00-starter-seed\\WPF\\WPFSample.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Sergei\\Downloads\\wpf-winforms-01-login (1)\\quickstart\\00-starter-seed\\WPF\\WPFSample.csproj",
+        "projectName": "WPFSample",
+        "projectPath": "C:\\Users\\Sergei\\Downloads\\wpf-winforms-01-login (1)\\quickstart\\00-starter-seed\\WPF\\WPFSample.csproj",
+        "packagesPath": "C:\\Users\\Sergei\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Sergei\\Downloads\\wpf-winforms-01-login (1)\\quickstart\\00-starter-seed\\WPF\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Sergei\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net462"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net462": {
+            "projectReferences": {}
+          }
+        }
+      },
+      "frameworks": {
+        "net462": {
+          "dependencies": {
+            "Auth0.OidcClient.WPF": {
+              "target": "Package",
+              "version": "[3.1.3, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    }
+  }
+}
