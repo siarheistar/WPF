@@ -37,7 +37,7 @@ namespace trading_WPF
             EndDate.SelectedDate = DateTime.Today.AddDays(-1);
             start = StartDate.SelectedDate.Value;
             end = EndDate.SelectedDate.Value;
-            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
+            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE"].ConnectionString;
             connection = new MySqlConnection(connectionString);
 
             ShowSymbolsList();
@@ -640,7 +640,7 @@ namespace trading_WPF
                         }
 
                         query2 = "create or replace view DMA_50 as SELECT date, symbol,AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc; " +
-                                "create or replace view DMA_200 as SELECT date, symbol, AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 200 PRECEDING AND 0 FOLLOWING ) DMA_200 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc;";
+                                 "create or replace view DMA_200 as SELECT date, symbol, AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 200 PRECEDING AND 0 FOLLOWING ) DMA_200 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc;";
 
 
                         string query3 = "call _sp_DMACalculation()";
