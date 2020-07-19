@@ -8,7 +8,7 @@ using System.Windows;
 
 namespace trading_WPF.Trading
 {
-    class TradeProcessor : MainWindow
+    class TradeProcessor : MainWindowScreen
     {
         public DateTime date { get; set; }
         public string Symbol { get; set; }
@@ -44,7 +44,7 @@ namespace trading_WPF.Trading
 
         public void TradeExecute(DateTime start, DateTime end)
         {
-            MainWindow mw = new MainWindow();
+            MainWindowScreen mw = new MainWindowScreen();
 
             query = @"SELECT symbol_short FROM algotrade.static where status = 'A'; ";
             DbCallSymbols(query);

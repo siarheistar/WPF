@@ -10,11 +10,12 @@ using System.Configuration;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Collections;
+using WPFAuthentication;
 
 namespace trading_WPF
 {
 
-    public partial class MainWindow : Window
+    public partial class MainWindowScreen : Window
     {
         private readonly MySqlConnection connection;
         private readonly string connectionString;
@@ -26,11 +27,11 @@ namespace trading_WPF
         private DateTime start;
         private DateTime end;
 
+        public MainWindow LoginForm;
 
 
 
-
-        public MainWindow()
+        public MainWindowScreen()
         {
             InitializeComponent();
             StartDate.SelectedDate = DateTime.Today.AddDays(-30);
@@ -860,6 +861,12 @@ namespace trading_WPF
                 return;
 
             end = EndDate.SelectedDate.Value;
+        }
+
+        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Hide();
+            LoginForm.Logout();
         }
     }
 }
