@@ -37,7 +37,7 @@ namespace trading_WPF.Trading
 
         public TradeProcessor()
         {
-            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE"].ConnectionString;
+            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
             connection = new MySqlConnection(connectionString);
         }
 

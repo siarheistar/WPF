@@ -3,23 +3,32 @@ using IdentityModel.OidcClient;
 using IdentityModel.OidcClient.Browser;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Text;
 using System.Windows;
 using System;
 using trading_WPF;
+using MySql.Data.MySqlClient;
+using System.Data;
 
 namespace WPFAuthentication
 {
-    /// <summary>
-    /// Interaction logic for MainWindowScreen.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public Auth0Client client;
 
+        private readonly MySqlConnection connection;
+        private readonly string connectionString;
+
+        public string EmailSelector { get; set; }
+        public object SelectedEmail { get; private set; }
+        private string email;
         public MainWindow()
         {
+
             InitializeComponent();
+            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
+            connection = new MySqlConnection(connectionString);
+            //ShowUsers();
+            EmailSelector = "@gmail.com";
             Hide();
             Login();
         }
@@ -37,7 +46,7 @@ namespace WPFAuthentication
 
             var extraParameters = new Dictionary<string, string>();
             extraParameters.Add("connection", "google-oauth2");
-            extraParameters.Add("login_hint", "pasha.dublin@gmail.com");
+            extraParameters.Add("login_hint", EmailSelector); //SelectedEmail.ToString()
 
             DisplayResult(await client.LoginAsync(extraParameters));
         }
@@ -47,31 +56,8 @@ namespace WPFAuthentication
             // Display error
             if (loginResult.IsError)
             {
-               // resultTextBox.Text = loginResult.Error;
                 throw new Exception(loginResult.Error);
             }
-
-            //loginButton.Visibility = Visibility.Collapsed;
-
-            //// Display result
-            //StringBuilder sb = new StringBuilder();
-
-            //sb.AppendLine("Tokens");
-            //sb.AppendLine("------");
-            //sb.AppendLine($"id_token: {loginResult.IdentityToken}");
-            //sb.AppendLine($"access_token: {loginResult.AccessToken}");
-            //sb.AppendLine($"refresh_token: {loginResult.RefreshToken}");
-            //sb.AppendLine();
-
-            //sb.AppendLine("Claims");
-            //sb.AppendLine("------");
-            //foreach (var claim in loginResult.User.Claims)
-            //{
-            //    sb.AppendLine($"{claim.Type}: {claim.Value}");
-            //}
-
-            //resultTextBox.Text = sb.ToString();
-
             MainWindowScreen mws = new MainWindowScreen();
             mws.LoginForm = this;
             mws.Show();
@@ -82,11 +68,62 @@ namespace WPFAuthentication
             BrowserResultType browserResult = await client.LogoutAsync();
 
             if (browserResult != BrowserResultType.Success)
-            {  
+            {
                 throw new Exception(browserResult.ToString());
             }
-
+            SelectedEmail = "";
+            Hide();
             Login();
+
         }
+
+
+
+        //private void ShowUsers()
+        //{
+        //    string query = "SELECT email FROM algotrade.users where status = 1;";
+        //    MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+        //    MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+
+        //    using (MysqlDataAdapter)
+        //    {
+        //        try
+        //        {
+        //            sqlCommand.Parameters.AddWithValue("@email", SelectedEmail);
+        //            DataTable EmailTable = new DataTable();
+        //            MysqlDataAdapter.Fill(EmailTable);
+        //            SelectedEmail = "@email";
+        //            //Log(msg: "finished", guiUpdate: () =>
+        //            {
+        //                UserList.DisplayMemberPath = "email";
+        //                UserList.SelectedValuePath = "email";
+        //                UserList.ItemsSource = EmailTable.DefaultView;
+        //            }
+        //            //);
+
+        //            Hide();
+        //            Login();
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            MessageBox.Show(e.ToString());
+
+        //        }
+        //        finally
+        //        {
+        //            connection.Close();
+        //        }
+        //    }
+
+
+        //}
+
+        //private void ListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        //{
+        //    ShowUsers();
+
+
+        //}
     }
+
 }

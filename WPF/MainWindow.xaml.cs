@@ -38,7 +38,7 @@ namespace trading_WPF
             EndDate.SelectedDate = DateTime.Today.AddDays(-1);
             start = StartDate.SelectedDate.Value;
             end = EndDate.SelectedDate.Value;
-            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE"].ConnectionString;
+            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
             connection = new MySqlConnection(connectionString);
 
             ShowSymbolsList();
@@ -357,12 +357,16 @@ namespace trading_WPF
             {
                 Log(msg: "...");
                 string query = $"SELECT count(*) as Buy FROM algotrade.factdata where symbol = @symbol and act = 'Buy' " +
-                               $"and date between'{start:yyyy-MM-dd}' and '{end:yyyy-MM-dd}';";
+                //$"and date between @Start_Date and '{end:yyyy-MM-dd}';";
+                $"'{start:yyyy-MM-dd}' and '{end:yyyy-MM-dd}';";
+
                 MySqlCommand sqlCommand = new MySqlCommand(query, connection);
                 MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
 
                 using (MysqlDataAdapter)
                 {
+                    //Command.Parameters.Add("@Start_Date", MySqlDbType.Date.);
+
                     sqlCommand.Parameters.AddWithValue("@symbol", symbol);
 
                     DataTable tradesTable = new DataTable();
