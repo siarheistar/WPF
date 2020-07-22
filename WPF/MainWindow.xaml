@@ -7,7 +7,8 @@
         mc:Ignorable="d"
 
         
-        Title="AlgoTrade" Height="1000" Width="1600.877">
+        Title="AlgoTrade" Height="1000" Width="1600.877"
+        >
     <!--<Frame x:Name="frame" Content="Frame" Margin="0" Source="/WpfClient;component/Pages/LoginPage.xaml" NavigationUIVisibility="Hidden"/>-->
 
     <Grid 
@@ -47,6 +48,7 @@
         <Label x:Name="Daily_trades_details" Content="Daily trades details" HorizontalAlignment="Left" Margin="-170,106,0,0" VerticalAlignment="Top" Width="110" RenderTransformOrigin="0.712,10.923" Height="25"/>
         <Label x:Name="Daily_Cash_details" Content="Daily Cash details" HorizontalAlignment="Left" Margin="525,106,0,0" VerticalAlignment="Top" Width="138" RenderTransformOrigin="0.712,10.923" Height="25"/>
         <Label x:Name="Log_process_display" Content="Log process display" HorizontalAlignment="Left" Margin="-557,540,0,0" VerticalAlignment="Top" Width="125" RenderTransformOrigin="0.712,10.923"/>
-        <Button Content="Log_Out" HorizontalAlignment="Left" Margin="766,10,0,0" VerticalAlignment="Top" Width="75" Click="LogoutButton_Click"/>
+        <Button Content="Log_Out" HorizontalAlignment="Left" Margin="678,0,0,0" VerticalAlignment="Top" Width="74" Click="LogoutButton_Click"/>
+        <Button Content="About" HorizontalAlignment="Left" Margin="787,0,0,0" VerticalAlignment="Top" Width="75" Click="AboutButton_Click"/>
     </Grid>
 </Window>

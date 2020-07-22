@@ -60,7 +60,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="About.xaml.cs">
+      <DependentUpon>About.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Trading\TradeProcessor.cs" />
+    <Page Include="About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Auth0LogIn.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -127,6 +134,18 @@
     <PackageReference Include="YahooFinanceApi">
       <Version>2.1.2</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <SplashScreen Include="Assets\bullsand bears.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\about.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Siarhei_Zurich.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Siarhei.jpeg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -28,6 +28,7 @@ namespace trading_WPF
         private DateTime end;
 
         public MainWindow LoginForm;
+        public About AboutForm;
 
 
 
@@ -872,5 +873,12 @@ namespace trading_WPF
             this.Hide();
             LoginForm.Logout();
         }
+
+        private void AboutButton_Click(object sender, RoutedEventArgs e)
+        {
+            About AboutScreen = new About();
+            AboutScreen.Show();
+        }
+
     }
 }

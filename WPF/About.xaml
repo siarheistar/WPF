@@ -1,0 +1,49 @@
+﻿<Window x:Name="About1" x:Class="trading_WPF.About"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:trading_WPF"
+        mc:Ignorable="d"
+        Title="About" Height="400" Width="600">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="79*" />
+            <ColumnDefinition Width="69*" />
+
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="1*" />
+
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Column="0" TextWrapping="Wrap" Margin="5"><LineBreak/><LineBreak/><LineBreak/><LineBreak/></TextBlock>
+
+        <TextBlock Grid.Column="1" TextWrapping="Wrap" Margin="10,5,0,5"><Run Text="Siarhei Staravoitau"/><LineBreak/><Run/><LineBreak/><Run Text="https://www.linkedin.com/in/siarhei-staravoitau/"/><LineBreak/><Run/><LineBreak/><Run Text="siarhei.star@gmail.com"/><LineBreak/><Run/><LineBreak/><Run Text=""/></TextBlock>
+
+        <Image Grid.Row="1" Source="/Assets/about.jpg" Margin="10,0,188,0" />
+        <RichTextBox HorizontalAlignment="Left" Height="231" VerticalAlignment="Top" Width="301" Margin="10,10,0,0">
+            <FlowDocument>
+                <Paragraph FontSize="11" FontFamily="Arial" Margin="0">
+                    <Run Text="Algorithmic Trading Simulator Application is designed to perform analysis of historical finance data from Yahoo finance using one of the financial technical analysis algorithms, process trade using this data, maintain trade results (trade booking, positions, cash) and provide trading activity reports."/>
+                </Paragraph>
+                <Paragraph FontSize="11" FontFamily="Arial" Margin="0">
+                    <Run/>
+                </Paragraph>
+                <Paragraph FontSize="11" FontFamily="Arial" Margin="0">
+                    <Run Text="The intended customers are starting traders enthusiasts intending to start trading on stock exchange."/>
+                </Paragraph>
+                <Paragraph FontSize="11" FontFamily="Arial" Margin="0">
+                    <Run/>
+                </Paragraph>
+                <Paragraph FontSize="11" FontFamily="Arial" Margin="0">
+                    <Run NumberSubstitution.CultureSource="User" FontSize="11" FontFamily="Arial" Text="Project developed in both WPF version and MVC dotnetcore 3.1 web application (as a bonus). Authentication is done using Auth0.com authentication service integration with multiple factor authorization."/>
+                </Paragraph>
+            </FlowDocument>
+        </RichTextBox>
+        <TextBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" Name="CurrentDate" Text="{Binding Source={x:Static system:DateTime.Now},  StringFormat='dd-MM-yyyy',Mode=OneWay}" Margin="200,87,10,10" Width="66"/>
+
+
+    </Grid>
+</Window>
