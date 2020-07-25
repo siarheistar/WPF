@@ -52,6 +52,10 @@
               "target": "Package",
               "version": "[3.5.3, )"
             },
+            "Xamarin.Essentials": {
+              "target": "Package",
+              "version": "[1.5.3.2, )"
+            },
             "YahooFinanceApi": {
               "target": "Package",
               "version": "[2.1.2, )"

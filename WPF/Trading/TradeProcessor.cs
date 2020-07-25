@@ -58,9 +58,11 @@ namespace trading_WPF.Trading
 
                     Symbol = (string)mySymbols[i]; // setting property for currently processing symbol
                                                    //CleanData(Symbol);
-                    string CleanData = "call _sp_CleanData('" + Symbol + "')";
+                    //string CleanData = "call _sp_CleanData('" + Symbol + "')";
 
-                    Console.WriteLine(CleanData);
+                    //Console.WriteLine(CleanData);
+
+                    CleanData(Symbol);
 
                     //        mw.DatabaseCalls(CleanData);
 
@@ -186,11 +188,17 @@ namespace trading_WPF.Trading
 
             open =
             //"call _sp_OpenPosition('" + trade_date + "', '" + Symbol + "', ClosePosition);";
-            "SELECT  close_pos FROM algotrade.positions where date =  (SELECT distinct date FROM algotrade.factdata WHERE date < '" + trade_date + "' and symbol = '" + Symbol + "' ORDER BY date desc LIMIT 1)  and symbol = '" + Symbol + "'";
+            "SELECT  close_pos FROM algotrade.positions where date =  " +
+            "(SELECT distinct date FROM algotrade.factdata WHERE date < '" + trade_date + "' and symbol = '" + Symbol + "' " +
+            "ORDER BY date desc LIMIT 1)  and symbol = '" + Symbol + "'";
             opn_cash_query =
             //"call _sp_OpenCash('" + trade_date + "',  '" + Symbol + "', CloseCash);";
 
-            "SELECT  close_cash FROM algotrade.cash where date =  (SELECT distinct date FROM algotrade.factdata WHERE date < '" + trade_date + "' and symbol = '" + Symbol + "' ORDER BY date desc LIMIT 1)  and symbol = '" + Symbol + "'";
+            "SELECT  close_cash FROM algotrade.cash where  date = (select max(date) FROM algotrade.cash where symbol = '" + Symbol + "') and symbol = '" + Symbol + "'";
+
+            //"SELECT  close_cash FROM algotrade.cash where date =  " +
+            //"(SELECT distinct date FROM algotrade.factdata WHERE date < '" + trade_date + "' and symbol = '" + Symbol + "' " +
+            //"ORDER BY date desc LIMIT 1)  and symbol = '" + Symbol + "'";
 
             string day =
             //"call _sp_TradeQuantity('" + trade_date + "', '" + Symbol + "', TradeQuantity);";

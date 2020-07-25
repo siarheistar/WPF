@@ -7,7 +7,7 @@
         mc:Ignorable="d"
 
         
-        Title="AlgoTrade" Height="1000" Width="1600.877"
+        Title="AlgoTrade" Height="950" Width="1500" ResizeMode="NoResize"
         >
     <!--<Frame x:Name="frame" Content="Frame" Margin="0" Source="/WpfClient;component/Pages/LoginPage.xaml" NavigationUIVisibility="Hidden"/>-->
 

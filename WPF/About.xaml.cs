@@ -1,6 +1,7 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Navigation;
+﻿using System.Windows;
+using System.Windows.Documents;
+//using Windows.UI.Xaml.Documents;
+using Xamarin.Essentials;
 
 namespace trading_WPF
 {
@@ -21,7 +22,6 @@ namespace trading_WPF
         //    CurrentDate.ItemsSource = DateTime.Now.ToString("MM/dd/yyyy");
 
         //}
-
 
     }
 }

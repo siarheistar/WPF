@@ -357,9 +357,12 @@ namespace trading_WPF
             try
             {
                 Log(msg: "...");
-                string query = $"SELECT count(*) as Buy FROM algotrade.factdata where symbol = @symbol and act = 'Buy' " +
-                //$"and date between @Start_Date and '{end:yyyy-MM-dd}';";
-                $"'{start:yyyy-MM-dd}' and '{end:yyyy-MM-dd}';";
+                string query = "select count(*) as Buy from algotrade.trades where quantity > 0 and symbol = @symbol;";
+
+                //$"SELECT count(*) as Buy FROM algotrade.factdata where symbol = @symbol and act = 'Buy' " +
+                //$"and date between (select min(date) FROM algotrade.trades where symbol = @symbol)  and (select max(date) FROM algotrade.trades  where symbol = @symbol);";
+
+                //$"'{start:yyyy-MM-dd}' and '{end:yyyy-MM-dd}';";
 
                 MySqlCommand sqlCommand = new MySqlCommand(query, connection);
                 MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
@@ -395,8 +398,8 @@ namespace trading_WPF
             try
             {
                 Log(msg: "...");
-                string query = $"SELECT count(*) as Sell FROM algotrade.factdata where symbol = @symbol and act = 'Sell' " +
-                               $"and date between '{start:yyyy-MM-dd}' and '{end:yyyy-MM-dd}';";
+                string query = "select count(*) as Sell from algotrade.trades where quantity < 0 and symbol = @symbol;";
+               
                 MySqlCommand sqlCommand = new MySqlCommand(query, connection);
                 MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
 
@@ -522,7 +525,7 @@ namespace trading_WPF
         }
 
 
-        private void ValidateSymbol()
+        private bool ValidateSymbol()
         {
             status = false;
             TradeProcessor tp = new TradeProcessor();
@@ -542,25 +545,76 @@ namespace trading_WPF
                     MessageBox.Show("Please select Symbol");
                 }
 
-                string query = "SELECT count(distinct `SecurityName`) FROM `algotrade`.`symbols`" +
-                //" where `Symbol` = '@SelectedSymbol' ;";
-                " where `Symbol` = '" + SelectedSymbol + "' ;";
-
-
-                if (tp.DBA(query) > 0)
+                if (SelectedSymbol.Length <= 5)
                 {
-                    status = true;
+
+                    if (!checkForSQLInjection(SelectedSymbol))
+                    {
+
+
+
+                        string query = "SELECT count(distinct `SecurityName`) FROM `algotrade`.`symbols`" +
+                        //" where `Symbol` = '@SelectedSymbol' ;";
+                        " where `Symbol` = '" + SelectedSymbol + "' ;";
+
+
+                        if (tp.DBA(query) > 0)
+                        {
+                            status = true;
+                        }
+                    }
+                    else
+                    {
+                        status = false;
+                        Symbol.Clear();
+                    }
                 }
+                else
+                {
+                    status = false;
+                    MessageBox.Show("Please enter Symbol with correct number of characters!");
+                    Symbol.Clear();
+                }
+
             }
+            return status;
         }
 
 
-        private void RemoveSymbol()
+        public static Boolean checkForSQLInjection(string userInput)
+
+        {
+
+            bool isSQLInjection = false;
+
+            string[] sqlCheckList = { "--", ";--", ";", "/*", "*/", "@@", "@", "char", "nchar", "varchar", "nvarchar", "alter", "begin", "cast",
+                                     "create", "cursor", "declare", "delete", "drop", "end", "exec", "execute", "fetch", "insert", "kill", "select",
+                                      "sys", "sysobjects", "syscolumns", "table", "update", "' or 1=1#", "' or 1=1--"};
+
+            string CheckString = userInput.Replace("'", "''");
+
+            for (int i = 0; i <= sqlCheckList.Length - 1; i++)
+
+            {
+
+                if ((CheckString.IndexOf(sqlCheckList[i],
+
+                    StringComparison.OrdinalIgnoreCase) >= 0))
+
+                { isSQLInjection = true; }
+            }
+
+            return isSQLInjection;
+        }
+    
+
+
+
+    private void RemoveSymbol()
         {
             try
             {
                 string query = "call _sp_RemoveSymbol('" + @symbol + "')";
-
                 MySqlCommand sqlCommand = new MySqlCommand(query, connection);
                 connection.Open();
                 sqlCommand.Parameters.AddWithValue("@symbol", SymbolsList.SelectedValue);
@@ -629,7 +683,7 @@ namespace trading_WPF
                                         
                     var history = await Yahoo.GetHistoricalAsync(SelectedSymbol, start, end, Period.Daily);
                     string query1 = "delete from algotrade.factdata where symbol = '" + SelectedSymbol + "'; ";
-                    string query2;
+
 
 
                     DatabaseCalls(query1);
@@ -645,7 +699,7 @@ namespace trading_WPF
                             DatabaseCalls(query);
                         }
 
-                        query2 = "create or replace view DMA_50 as SELECT date, symbol,AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc; " +
+                        string query2 = "create or replace view DMA_50 as SELECT date, symbol,AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc; " +
                                  "create or replace view DMA_200 as SELECT date, symbol, AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 200 PRECEDING AND 0 FOLLOWING ) DMA_200 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc;";
 
 

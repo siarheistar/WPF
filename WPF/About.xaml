@@ -6,7 +6,7 @@
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:trading_WPF"
         mc:Ignorable="d"
-        Title="About" Height="400" Width="600">
+        Title="About" Height="400" Width="650" ResizeMode="NoResize">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="79*" />
@@ -20,10 +20,16 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.Column="0" TextWrapping="Wrap" Margin="5"><LineBreak/><LineBreak/><LineBreak/><LineBreak/></TextBlock>
 
-        <TextBlock Grid.Column="1" TextWrapping="Wrap" Margin="10,5,0,5"><Run Text="Siarhei Staravoitau"/><LineBreak/><Run/><LineBreak/><Run Text="https://www.linkedin.com/in/siarhei-staravoitau/"/><LineBreak/><Run/><LineBreak/><Run Text="siarhei.star@gmail.com"/><LineBreak/><Run/><LineBreak/><Run Text=""/></TextBlock>
-
-        <Image Grid.Row="1" Source="/Assets/about.jpg" Margin="10,0,188,0" />
-        <RichTextBox HorizontalAlignment="Left" Height="231" VerticalAlignment="Top" Width="301" Margin="10,10,0,0">
+        <RichTextBox Grid.Column="1" Margin="10,10,10,5">
+            <FlowDocument>
+                <Paragraph FontSize="12" FontFamily="Arial" Margin="0">
+               <Run Text="Siarhei Staravoitau"/><LineBreak/><Run/><LineBreak/><Run Text="HDCYBSEPOL"/><LineBreak/><Run Text="NCI"/><LineBreak/><Run/><LineBreak/><Run/><LineBreak/><Run Text="https://www.linkedin.com/in/siarhei-staravoitau/"/>
+                    <LineBreak/><Run/><LineBreak/><Run Text="siarhei.star@gmail.com"/><LineBreak/><Run/><LineBreak/><Run Text=""/>
+            </Paragraph>
+            </FlowDocument>
+        </RichTextBox>
+        <Image Grid.Row="1" Source="/Assets/about.jpg" Margin="10,10,188,10" />
+        <RichTextBox HorizontalAlignment="Left" Height="231" VerticalAlignment="Top" Width="324" Margin="10,10,0,0">
             <FlowDocument>
                 <Paragraph FontSize="11" FontFamily="Arial" Margin="0">
                     <Run Text="Algorithmic Trading Simulator Application is designed to perform analysis of historical finance data from Yahoo finance using one of the financial technical analysis algorithms, process trade using this data, maintain trade results (trade booking, positions, cash) and provide trading activity reports."/>
@@ -43,6 +49,7 @@
             </FlowDocument>
         </RichTextBox>
         <TextBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" Name="CurrentDate" Text="{Binding Source={x:Static system:DateTime.Now},  StringFormat='dd-MM-yyyy',Mode=OneWay}" Margin="200,87,10,10" Width="66"/>
+        <Image Grid.Column="1" Grid.Row="1" Source="/Assets/nciLogo.png" HorizontalAlignment="Left" Width="120"/>  
 
 
     </Grid>
