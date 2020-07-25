@@ -1,24 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Project\\12072020\\WPF\\WPF\\AlgoTrade_WPF.csproj": {}
+    "C:\\project\\github\\WPF\\WPF\\AlgoTrade_WPF.csproj": {}
   },
   "projects": {
-    "C:\\Project\\12072020\\WPF\\WPF\\AlgoTrade_WPF.csproj": {
+    "C:\\project\\github\\WPF\\WPF\\AlgoTrade_WPF.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Project\\12072020\\WPF\\WPF\\AlgoTrade_WPF.csproj",
+        "projectUniqueName": "C:\\project\\github\\WPF\\WPF\\AlgoTrade_WPF.csproj",
         "projectName": "AlgoTrade_WPF",
-        "projectPath": "C:\\Project\\12072020\\WPF\\WPF\\AlgoTrade_WPF.csproj",
-        "packagesPath": "C:\\Users\\Sergei\\.nuget\\packages\\",
-        "outputPath": "C:\\Project\\12072020\\WPF\\WPF\\obj\\",
+        "projectPath": "C:\\project\\github\\WPF\\WPF\\AlgoTrade_WPF.csproj",
+        "packagesPath": "C:\\Users\\serge\\.nuget\\packages\\",
+        "outputPath": "C:\\project\\github\\WPF\\WPF\\obj\\",
         "projectStyle": "PackageReference",
         "skipContentFileWrite": true,
         "fallbackFolders": [
           "C:\\Microsoft\\Xamarin\\NuGet\\"
         ],
         "configFilePaths": [
-          "C:\\Users\\Sergei\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\serge\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],

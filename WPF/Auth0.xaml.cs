@@ -11,7 +11,7 @@ using System.Data;
 
 namespace WPFAuthentication
 {
-    public partial class MainWindow : Window
+    public partial class Auth0Window : Window
     {
         public Auth0Client client;
 
@@ -21,14 +21,14 @@ namespace WPFAuthentication
         public string EmailSelector { get; set; }
         public object SelectedEmail { get; private set; }
         private string email;
-        public MainWindow()
+        public Auth0Window()
         {
 
             InitializeComponent();
             connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
             connection = new MySqlConnection(connectionString);
             //ShowUsers();
-            EmailSelector = "@gmail.com";
+            EmailSelector = ConfigurationManager.AppSettings["EmailSelector"];
             Hide();
             Login();
         }

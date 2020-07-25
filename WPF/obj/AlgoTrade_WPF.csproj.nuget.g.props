@@ -5,7 +5,7 @@
     <RestoreTool Condition=" '$(RestoreTool)' == '' ">NuGet</RestoreTool>
     <ProjectAssetsFile Condition=" '$(ProjectAssetsFile)' == '' ">$(MSBuildThisFileDirectory)project.assets.json</ProjectAssetsFile>
     <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
-    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\Sergei\.nuget\packages\;C:\Microsoft\Xamarin\NuGet\</NuGetPackageFolders>
+    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\serge\.nuget\packages\;C:\Microsoft\Xamarin\NuGet\</NuGetPackageFolders>
     <NuGetProjectStyle Condition=" '$(NuGetProjectStyle)' == '' ">PackageReference</NuGetProjectStyle>
     <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">5.6.0</NuGetToolVersion>
   </PropertyGroup>
@@ -16,7 +16,7 @@
     <Import Project="$(NuGetPackageRoot)microsoft.windows.sdk.contracts\10.0.18362.2005\build\Microsoft.Windows.SDK.Contracts.props" Condition="Exists('$(NuGetPackageRoot)microsoft.windows.sdk.contracts\10.0.18362.2005\build\Microsoft.Windows.SDK.Contracts.props')" />
   </ImportGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <PkgSecurityCodeScan Condition=" '$(PkgSecurityCodeScan)' == '' ">C:\Users\Sergei\.nuget\packages\securitycodescan\3.5.3</PkgSecurityCodeScan>
-    <PkgMicrosoft_Toolkit_Wpf_UI_Controls_WebView Condition=" '$(PkgMicrosoft_Toolkit_Wpf_UI_Controls_WebView)' == '' ">C:\Users\Sergei\.nuget\packages\microsoft.toolkit.wpf.ui.controls.webview\6.1.1</PkgMicrosoft_Toolkit_Wpf_UI_Controls_WebView>
+    <PkgSecurityCodeScan Condition=" '$(PkgSecurityCodeScan)' == '' ">C:\Users\serge\.nuget\packages\securitycodescan\3.5.3</PkgSecurityCodeScan>
+    <PkgMicrosoft_Toolkit_Wpf_UI_Controls_WebView Condition=" '$(PkgMicrosoft_Toolkit_Wpf_UI_Controls_WebView)' == '' ">C:\Users\serge\.nuget\packages\microsoft.toolkit.wpf.ui.controls.webview\6.1.1</PkgMicrosoft_Toolkit_Wpf_UI_Controls_WebView>
   </PropertyGroup>
 </Project>

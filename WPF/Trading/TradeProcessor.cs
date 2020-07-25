@@ -45,6 +45,7 @@ namespace trading_WPF.Trading
         public void TradeExecute(DateTime start, DateTime end)
         {
             MainWindowScreen mw = new MainWindowScreen();
+            MessageBox.Show("Click OK to start trades simulation run...");
 
             query = @"SELECT symbol_short FROM algotrade.static where status = 'A'; ";
             DbCallSymbols(query);

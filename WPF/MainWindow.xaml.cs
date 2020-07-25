@@ -27,7 +27,7 @@ namespace trading_WPF
         private DateTime start;
         private DateTime end;
 
-        public MainWindow LoginForm;
+        public Auth0Window LoginForm;
         public About AboutForm;
 
 
@@ -662,11 +662,9 @@ namespace trading_WPF
 
         public async Task YFinance()
 
-
         {
-            //TradeProcessor tp = new TradeProcessor();
-
-            query = @"SELECT symbol_short FROM algotrade.static where status = 'A'; ";
+           MessageBox.Show("Click OK to start Historical data download...");
+           query = @"SELECT symbol_short FROM algotrade.static where status = 'A'; ";
             DbCallSymbols(query);
 
             Yahoo.IgnoreEmptyRows = true;
@@ -832,15 +830,24 @@ namespace trading_WPF
 
         private async void RefreshData(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                await YFinance();
+            if(start < end)
+            {            
+                    try
+                    {
+                        await YFinance();
+                    }
+                    catch (Exception ae)
+                    {
+                        MessageBox.Show(ae.ToString());
+                        MessageBox.Show("Select symbol to refresh");
+                    }
+            
             }
-            catch (Exception ae)
+            else
             {
-                MessageBox.Show(ae.ToString());
-                MessageBox.Show("Select symbol to refresh");
+                MessageBox.Show("Select START date and END dates correctly!");
             }
+
         }
 
         private void Add_Symbol(object sender, RoutedEventArgs e)
@@ -862,9 +869,16 @@ namespace trading_WPF
 
         private async void Process_Trade(object sender, RoutedEventArgs e)
         {
-            TradeProcessor tradeProcessor = new TradeProcessor();
-            tradeProcessor.TradeExecute(start, end);
-            ShowSymbolsList();
+            if (start < end)
+            {
+                TradeProcessor tradeProcessor = new TradeProcessor();
+                tradeProcessor.TradeExecute(start, end);
+                ShowSymbolsList();
+            }
+            else
+            {
+                MessageBox.Show("Select START date and END dates correctly!");
+            }
         }
 
         public void DateValidator(string ed)
