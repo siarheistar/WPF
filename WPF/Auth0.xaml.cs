@@ -52,15 +52,28 @@ namespace WPFAuthentication
         }
 
         private void DisplayResult(LoginResult loginResult)
-        {
-            // Display error
-            if (loginResult.IsError)
+        {// Display error
+
+            
+            if (!loginResult.IsError)
             {
-                throw new Exception(loginResult.Error);
+                //MessageBox.Show(loginResult.Error.ToString());
+                MainWindowScreen mws = new MainWindowScreen();
+                mws.LoginForm = this;
+                mws.Show();
             }
-            MainWindowScreen mws = new MainWindowScreen();
-            mws.LoginForm = this;
-            mws.Show();
+            else if(loginResult.Error.ToString().Equals("unauthorized"))
+            {
+                MessageBox.Show(loginResult.Error.ToString());
+                Hide();
+                Login();
+            }
+            else if (loginResult.IsError)
+            {
+                MessageBox.Show(loginResult.Error.ToString());
+                Close();
+            }
+                            
         }
 
         public async void Logout()

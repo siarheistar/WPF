@@ -39,7 +39,7 @@ namespace trading_WPF
             EndDate.SelectedDate = DateTime.Today.AddDays(-1);
             start = StartDate.SelectedDate.Value;
             end = EndDate.SelectedDate.Value;
-            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
+            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE"].ConnectionString;
             connection = new MySqlConnection(connectionString);
 
             ShowSymbolsList();
