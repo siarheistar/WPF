@@ -54,7 +54,9 @@ namespace WPFAuthentication
         private void DisplayResult(LoginResult loginResult)
         {// Display error
 
-            
+         //   MessageBox.Show(loginResult.User.Identity.ToString());
+
+
             if (!loginResult.IsError)
             {
                 //MessageBox.Show(loginResult.Error.ToString());
@@ -79,7 +81,7 @@ namespace WPFAuthentication
         public async void Logout()
         {
             BrowserResultType browserResult = await client.LogoutAsync();
-
+            
             if (browserResult != BrowserResultType.Success)
             {
                 throw new Exception(browserResult.ToString());

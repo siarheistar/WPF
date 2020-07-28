@@ -37,7 +37,7 @@ namespace trading_WPF.Trading
 
         public TradeProcessor()
         {
-            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE"].ConnectionString;
+            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
             connection = new MySqlConnection(connectionString);
         }
 
@@ -46,9 +46,12 @@ namespace trading_WPF.Trading
         {
             MainWindowScreen mw = new MainWindowScreen();
             MessageBox.Show("Click OK to start trades simulation run...");
+                            
 
-            query = @"SELECT symbol_short FROM algotrade.static where status = 'A'; ";
+            /// SQL query below takes only active symbols in static table and only those symbols containing factdata entries
+            query = @"SELECT distinct st.symbol_short FROM algotrade.static st, algotrade.factdata fd where st.status = 'A' and fd.symbol = st.symbol_short; ";
             DbCallSymbols(query);
+
 
             if (mySymbols.Count >= 1 && mySymbols.Count <= Int32.MaxValue) // This code is to check Integer overflow
             {
@@ -58,14 +61,9 @@ namespace trading_WPF.Trading
                 {
 
                     Symbol = (string)mySymbols[i]; // setting property for currently processing symbol
-                                                   //CleanData(Symbol);
-                    //string CleanData = "call _sp_CleanData('" + Symbol + "')";
-
-                    //Console.WriteLine(CleanData);
+                                                  
 
                     CleanData(Symbol);
-
-                    //        mw.DatabaseCalls(CleanData);
 
                     QueryDates = $"select date from algotrade.factdata where date between '{start:yyyy-MM-dd}' and '{end:yyyy-MM-dd}'";
 
@@ -83,8 +81,9 @@ namespace trading_WPF.Trading
 
                         //reader.Close();
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        MessageBox.Show(e.ToString());
                         throw;
                     }
                     finally
@@ -122,9 +121,10 @@ namespace trading_WPF.Trading
                                     string PosAndCashUpdate = "call _sp_BuyPosAndCashUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "', '" + Math.Round(open_pos, 2) + "', '" + Math.Round(day_trade, 2) + "', '" + Math.Round(close_pos, 2) + "',  '" + Math.Round(open_cash, 2) + "', '" + Math.Round(day_cash, 2) + "', '" + Math.Round(close_cash, 2) + "')";
                                     mw.DatabaseCalls(PosAndCashUpdate);
                                 }
-                                catch //(NullReferenceException e)
+                                catch (NullReferenceException e)
                                 {
-
+                                    MessageBox.Show(e.ToString());
+                                    throw;
                                 }
                                 finally
                                 {
@@ -153,9 +153,10 @@ namespace trading_WPF.Trading
                                     }
 
                                 }
-                                catch //(NullReferenceException e)
+                                catch (NullReferenceException e)
                                 {
-
+                                    MessageBox.Show(e.ToString());
+                                    throw;
                                 }
                                 finally
                                 {
@@ -196,10 +197,6 @@ namespace trading_WPF.Trading
             //"call _sp_OpenCash('" + trade_date + "',  '" + Symbol + "', CloseCash);";
 
             "SELECT  close_cash FROM algotrade.cash where  date = (select max(date) FROM algotrade.cash where symbol = '" + Symbol + "') and symbol = '" + Symbol + "'";
-
-            //"SELECT  close_cash FROM algotrade.cash where date =  " +
-            //"(SELECT distinct date FROM algotrade.factdata WHERE date < '" + trade_date + "' and symbol = '" + Symbol + "' " +
-            //"ORDER BY date desc LIMIT 1)  and symbol = '" + Symbol + "'";
 
             string day =
             //"call _sp_TradeQuantity('" + trade_date + "', '" + Symbol + "', TradeQuantity);";

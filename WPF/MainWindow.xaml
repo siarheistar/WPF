@@ -7,48 +7,55 @@
         mc:Ignorable="d"
 
         
-        Title="AlgoTrade" Height="950" Width="1500" ResizeMode="NoResize"
+        Title="AlgoTrade" Height="905" Width="1410" ResizeMode="NoResize"
         >
     <!--<Frame x:Name="frame" Content="Frame" Margin="0" Source="/WpfClient;component/Pages/LoginPage.xaml" NavigationUIVisibility="Hidden"/>-->
 
     <Grid 
         
         x:Name="Algotrade" Margin="0,0,37,71" RenderTransformOrigin="0.513,0.644" Width="872" HorizontalAlignment="Right">
-        <Label x:Name="Symbols" Content="Symbols" HorizontalAlignment="Left" Margin="-557,19,0,0" VerticalAlignment="Top" Width="73" RenderTransformOrigin="0.712,10.923"/>
-        <ListBox x:Name="SymbolsList" HorizontalAlignment="Left" Height="145" Margin="-555,54,0,0" VerticalAlignment="Top" Width="80" SelectionChanged="SymbolsList_SelectionChanged" SelectionMode="Single"/>
-        <Label Content="Positions" HorizontalAlignment="Left" Margin="-457,19,0,0" VerticalAlignment="Top" Width="77" Height="30"/>
-        <ListBox x:Name="PositionsValue" HorizontalAlignment="Left" Height="23" Margin="-454,70,0,0" VerticalAlignment="Top" Width="136"/>
-        <Label Content="Cash" HorizontalAlignment="Left" Margin="-292,19,0,0" VerticalAlignment="Top" Width="77" Height="30" RenderTransformOrigin="0.065,0.567"/>
-        <ListBox x:Name="CashValue" HorizontalAlignment="Left" Height="23" Margin="-292,70,0,0" VerticalAlignment="Top" Width="130"/>
-        <Label x:Name="TodayTrades" Content="TodayTrades&#xD;&#xA;Gross amount" HorizontalAlignment="Left" Margin="130,3,0,0" VerticalAlignment="Top" Width="87" Height="46"/>
-        <ListBox x:Name="TodayTradesValue" HorizontalAlignment="Left" Height="23" Margin="130,70,0,0" VerticalAlignment="Top" Width="161"/>
-        <Label Content="Price" HorizontalAlignment="Left" Margin="-144,19,0,0" VerticalAlignment="Top" Width="77" Height="30"/>
-        <ListBox x:Name="PriceValue" HorizontalAlignment="Left" Height="23" Margin="-144,70,0,0" VerticalAlignment="Top" Width="135"/>
-        <Label Content="Quantity" HorizontalAlignment="Left" Margin="29,19,0,0" VerticalAlignment="Top" Width="77" Height="30"/>
-        <ListBox x:Name="QuantityValue" HorizontalAlignment="Left" Height="23" Margin="29,70,0,0" VerticalAlignment="Top" Width="77"/>
-        <Button Content="Remove Symbol" HorizontalAlignment="Left" Margin="-292,165,0,0" VerticalAlignment="Top" Width="98" Click="RemoveSymbol"/>
-        <Button Content="Refresh Symbols" HorizontalAlignment="Left" Margin="-454,165,0,0" VerticalAlignment="Top" Width="100" Click="RefreshSymbols"/>
-        <Button Content="Refresh Data from YFinance" HorizontalAlignment="Left" Margin="-557,237,0,0" VerticalAlignment="Top" Width="171" Click="RefreshData"/>
-        <Button Content="Add Symbol" HorizontalAlignment="Left" Margin="-292,125,0,0" VerticalAlignment="Top" Width="100" Click="Add_Symbol" RenderTransformOrigin="1.57,0.1"/>
-        <TextBox x:Name="Symbol" HorizontalAlignment="Left" Height="20" Margin="-454,124,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="136" />
-        <Button Content="Trades Simulation" HorizontalAlignment="Left" Margin="-337,237,0,0" VerticalAlignment="Top" Width="100" Click="Process_Trade" RenderTransformOrigin="-0.173,0.6"/>
-        <DataGrid x:Name="Show_Trades" HorizontalAlignment="Left" Height="418" Margin="-170,140,0,0" VerticalAlignment="Top" Width="360" FontSize="10"/>
-        <DataGrid x:Name="Show_POS" HorizontalAlignment="Left" Height="418" Margin="196,140,0,0" VerticalAlignment="Top" Width="324" FontSize="10"/>
-        <DataGrid x:Name="Show_Daily_Cash" HorizontalAlignment="Left" Height="418" Margin="525,140,-16,0" VerticalAlignment="Top" Width="363" FontSize="10"/>
-        <ListBox x:Name="BuyValue" HorizontalAlignment="Left" Height="23" Margin="380,70,0,0" VerticalAlignment="Top" Width="158" FontSize="10"/>
-        <ListBox x:Name="SellValue" HorizontalAlignment="Left" Height="23" Margin="590,70,0,0" VerticalAlignment="Top" Width="131" FontSize="10"/>
-        <Label Content="Buy Quantity" HorizontalAlignment="Left" Margin="380,23,0,0" VerticalAlignment="Top" Width="123" Height="26" RenderTransformOrigin="-0.921,0.462"/>
-        <Label Content="Sell Quantity" HorizontalAlignment="Left" Margin="590,23,0,0" VerticalAlignment="Top" Width="84" Height="26" RenderTransformOrigin="0.371,0.567"/>
-        <DatePicker x:Name="StartDate" SelectedDateChanged="StartDate_OnSelectedDateChanged" HorizontalAlignment="Left" Margin="-555,323,0,0" VerticalAlignment="Top" DisplayDate="1990-01-01" FirstDayOfWeek="Monday" IsDropDownOpen="True" Text="Start Date"/>
-        <DatePicker x:Name="EndDate" SelectedDateChanged="EndDate_OnSelectedDateChanged" HorizontalAlignment="Left" Margin="-377,323,0,0" VerticalAlignment="Top"  DisplayDate="2020-07-12" FirstDayOfWeek="Monday" IsDropDownOpen="True" Text="End Date" />
-        <ListBox x:Name="LogList" Height="220" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Margin="-555,0,0,10"/>
-        <Label x:Name="Start_Date" Content="Start Date" HorizontalAlignment="Left" Margin="-555,282,0,0" VerticalAlignment="Top" Width="73" RenderTransformOrigin="0.712,10.923"/>
-        <Label x:Name="End_Date" Content="End Date" HorizontalAlignment="Left" Margin="-377,282,0,0" VerticalAlignment="Top" Width="73" RenderTransformOrigin="0.712,10.923"/>
-        <Label x:Name="Daily_Positions_details" Content="Daily Positions details" HorizontalAlignment="Left" Margin="196,108,0,0" VerticalAlignment="Top" Width="138" RenderTransformOrigin="0.712,10.923" Height="25"/>
-        <Label x:Name="Daily_trades_details" Content="Daily trades details" HorizontalAlignment="Left" Margin="-170,106,0,0" VerticalAlignment="Top" Width="110" RenderTransformOrigin="0.712,10.923" Height="25"/>
-        <Label x:Name="Daily_Cash_details" Content="Daily Cash details" HorizontalAlignment="Left" Margin="525,106,0,0" VerticalAlignment="Top" Width="138" RenderTransformOrigin="0.712,10.923" Height="25"/>
-        <Label x:Name="Log_process_display" Content="Log process display" HorizontalAlignment="Left" Margin="-557,540,0,0" VerticalAlignment="Top" Width="125" RenderTransformOrigin="0.712,10.923"/>
-        <Button Content="Log_Out" HorizontalAlignment="Left" Margin="678,0,0,0" VerticalAlignment="Top" Width="74" Click="LogoutButton_Click"/>
-        <Button Content="About" HorizontalAlignment="Left" Margin="787,0,0,0" VerticalAlignment="Top" Width="75" Click="AboutButton_Click"/>
+        <Label x:Name="Symbols" Content="Symbols" HorizontalAlignment="Left" Margin="-474,18,0,0" VerticalAlignment="Top" Width="73" RenderTransformOrigin="0.712,10.923"/>
+        <ListBox x:Name="SymbolsList" HorizontalAlignment="Left" Height="145" Margin="-474,63,0,0" VerticalAlignment="Top" Width="80" SelectionChanged="SymbolsList_SelectionChanged" SelectionMode="Single"/>
+        <Label Content="Positions" HorizontalAlignment="Left" Margin="-374,18,0,0" VerticalAlignment="Top" Width="77" Height="30"/>
+        <ListBox x:Name="PositionsValue" HorizontalAlignment="Left" Height="23" Margin="-371,69,0,0" VerticalAlignment="Top" Width="136"/>
+        <Label Content="Cash" HorizontalAlignment="Left" Margin="-209,18,0,0" VerticalAlignment="Top" Width="77" Height="30" RenderTransformOrigin="0.065,0.567"/>
+        <ListBox x:Name="CashValue" HorizontalAlignment="Left" Height="23" Margin="-209,69,0,0" VerticalAlignment="Top" Width="130"/>
+        <Label x:Name="TodayTrades" Content="TodayTrades&#xD;&#xA;Gross amount" HorizontalAlignment="Left" Margin="213,12,0,0" VerticalAlignment="Top" Width="87" Height="46"/>
+        <ListBox x:Name="TodayTradesValue" HorizontalAlignment="Left" Height="23" Margin="213,69,0,0" VerticalAlignment="Top" Width="161"/>
+        <Label Content="Price" HorizontalAlignment="Left" Margin="-61,18,0,0" VerticalAlignment="Top" Width="77" Height="30"/>
+        <ListBox x:Name="PriceValue" HorizontalAlignment="Left" Height="23" Margin="-61,69,0,0" VerticalAlignment="Top" Width="135"/>
+        <Label Content="Quantity" HorizontalAlignment="Left" Margin="112,18,0,0" VerticalAlignment="Top" Width="77" Height="30"/>
+        <ListBox x:Name="QuantityValue" HorizontalAlignment="Left" Height="23" Margin="112,69,0,0" VerticalAlignment="Top" Width="77"/>
+        <Button Content="Remove Symbol" HorizontalAlignment="Left" Margin="-218,180,0,0" VerticalAlignment="Top" Width="98" Click="RemoveSymbol"/>
+        <Button Content="Refresh Symbols" HorizontalAlignment="Left" Margin="-371,180,0,0" VerticalAlignment="Top" Width="100" Click="RefreshSymbols"/>
+        <Button Content="Refresh Data from YFinance" HorizontalAlignment="Left" Margin="-414,269,0,0" VerticalAlignment="Top" Width="171" Click="RefreshData"/>
+        <Button Content="Add Symbol" HorizontalAlignment="Left" Margin="-220,140,0,0" VerticalAlignment="Top" Width="100" Click="Add_Symbol" RenderTransformOrigin="1.57,0.1"/>
+        <TextBox x:Name="Symbol" HorizontalAlignment="Left" Height="20" Margin="-371,139,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="136" />
+        <Button Content="Trades Simulation" HorizontalAlignment="Left" Margin="-225,269,0,0" VerticalAlignment="Top" Width="100" Click="Process_Trade" RenderTransformOrigin="-0.173,0.6"/>
+        <DataGrid x:Name="Show_Trades" HorizontalAlignment="Left" Height="418" Margin="-87,140,0,0" VerticalAlignment="Top" Width="307" FontSize="10"/>
+        <DataGrid x:Name="Show_POS" HorizontalAlignment="Left" Height="418" Margin="225,140,0,0" VerticalAlignment="Top" Width="327" FontSize="10"/>
+        <DataGrid x:Name="Show_Daily_Cash" HorizontalAlignment="Left" Height="418" Margin="557,140,-13,0" VerticalAlignment="Top" Width="328" FontSize="10"/>
+        <ListBox x:Name="BuyValue" HorizontalAlignment="Left" Height="23" Margin="463,69,0,0" VerticalAlignment="Top" Width="158" FontSize="10"/>
+        <ListBox x:Name="SellValue" HorizontalAlignment="Left" Height="23" Margin="673,69,0,0" VerticalAlignment="Top" Width="131" FontSize="10"/>
+        <Label Content="Buy Quantity" HorizontalAlignment="Left" Margin="463,30,0,0" VerticalAlignment="Top" Width="123" Height="26" RenderTransformOrigin="-0.921,0.462"/>
+        <Label Content="Sell Quantity" HorizontalAlignment="Left" Margin="673,30,0,0" VerticalAlignment="Top" Width="84" Height="26" RenderTransformOrigin="0.371,0.567"/>
+        <DatePicker x:Name="StartDate" SelectedDateChanged="StartDate_OnSelectedDateChanged" HorizontalAlignment="Left" Margin="-436,374,0,0" VerticalAlignment="Top" DisplayDate="1990-01-01" FirstDayOfWeek="Monday" IsDropDownOpen="True" Text="Start Date"/>
+        <DatePicker x:Name="EndDate" SelectedDateChanged="EndDate_OnSelectedDateChanged" HorizontalAlignment="Left" Margin="-258,374,0,0" VerticalAlignment="Top"  DisplayDate="2020-07-12" FirstDayOfWeek="Monday" IsDropDownOpen="True" Text="End Date" />
+        <ListBox x:Name="LogList" Height="191" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Margin="-472,0,-13,23"/>
+        <Label x:Name="Start_Date" Content="Start Date" HorizontalAlignment="Left" Margin="-436,333,0,0" VerticalAlignment="Top" Width="73" RenderTransformOrigin="0.712,10.923"/>
+        <Label x:Name="End_Date" Content="End Date" HorizontalAlignment="Left" Margin="-258,333,0,0" VerticalAlignment="Top" Width="73" RenderTransformOrigin="0.712,10.923"/>
+        <Label x:Name="Daily_Positions_details" Content="Daily Positions details" HorizontalAlignment="Left" Margin="203,106,0,0" VerticalAlignment="Top" Width="138" RenderTransformOrigin="0.712,10.923" Height="25"/>
+        <Label x:Name="Daily_trades_details" Content="Daily trades details" HorizontalAlignment="Left" Margin="-87,105,0,0" VerticalAlignment="Top" Width="110" RenderTransformOrigin="0.712,10.923" Height="25"/>
+        <Label x:Name="Daily_Cash_details" Content="Daily Cash details" HorizontalAlignment="Left" Margin="512,106,0,0" VerticalAlignment="Top" Width="138" RenderTransformOrigin="0.712,10.923" Height="25"/>
+        <Label x:Name="Log_process_display" Content="Log process display" HorizontalAlignment="Left" Margin="-474,539,0,0" VerticalAlignment="Top" Width="125" RenderTransformOrigin="0.712,10.923"/>
+        <Button Content="Log_Out" HorizontalAlignment="Left" Margin="679,10,0,0" VerticalAlignment="Top" Width="74" Click="LogoutButton_Click" RenderTransformOrigin="0.527,0.95"/>
+        <Button Content="About" HorizontalAlignment="Left" Margin="787,10,0,0" VerticalAlignment="Top" Width="75" Click="AboutButton_Click"/>
+        <Label x:Name="Siarhei_Staravoitau__NCI__2020" Content="Copyright ©Siarhei Staravoitau, NCI HDCYBSEPOL, 2020" HorizontalAlignment="Left" Height="35" Margin="-472,812,0,-41" VerticalAlignment="Top" Width="327"/>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="102" Margin="-387,106,0,0" VerticalAlignment="Top" Width="282">
+            <Label Content="Symbols Maintenance" Margin="9,-1,142,74"/>
+        </Border>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="70" Margin="-437,231,0,0" VerticalAlignment="Top" Width="333">
+            <Label Content="Data Refresh and Processing" HorizontalAlignment="Left" Height="31" Margin="22,-1,0,0" VerticalAlignment="Top" Width="166"/>
+        </Border>
     </Grid>
 </Window>

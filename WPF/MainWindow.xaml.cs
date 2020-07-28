@@ -35,11 +35,11 @@ namespace trading_WPF
         public MainWindowScreen()
         {
             InitializeComponent();
-            StartDate.SelectedDate = DateTime.Today.AddDays(-30);
+            StartDate.SelectedDate = DateTime.Today.AddDays(-366);
             EndDate.SelectedDate = DateTime.Today.AddDays(-1);
             start = StartDate.SelectedDate.Value;
             end = EndDate.SelectedDate.Value;
-            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE"].ConnectionString;
+            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
             connection = new MySqlConnection(connectionString);
 
             ShowSymbolsList();
@@ -128,9 +128,6 @@ namespace trading_WPF
                 using (MysqlDataAdapter)
                 {
                     sqlCommand.Parameters.AddWithValue("@symbol", symbol);
-
-                    //SelectedSymbol = SymbolsList.SelectedValue.ToString();
-
                     DataTable positionsTable = new DataTable();
                     MysqlDataAdapter.Fill(positionsTable);
 
@@ -140,14 +137,6 @@ namespace trading_WPF
                         PositionsValue.SelectedValuePath = "POS";
                         PositionsValue.ItemsSource = positionsTable.DefaultView;
                     });
-
-                    // PositionLBL.Content = MysqlDataAdapter.Fill(positionsTable).ToString();
-
-
-                    //ShowCash();
-                    //ShowTodayTrades();
-                    //ShowTodayQuantity();
-                    //ShowTodayPrice();
                 }
 
             }
@@ -189,7 +178,6 @@ namespace trading_WPF
             {
                 MessageBox.Show(e.ToString());
             }
-
         }
         private void ShowTodayTrades()
         {
@@ -232,7 +220,6 @@ namespace trading_WPF
                 Log(msg: "...");
 
                 string query = "SELECT quantity FROM algotrade.trades where symbol = @symbol  and date = (SELECT max(date) FROM trades where symbol = @symbol);";
-
 
                 MySqlCommand sqlCommand = new MySqlCommand(query, connection);
                 MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
@@ -329,7 +316,7 @@ namespace trading_WPF
             {
                 Log(msg: "...");
 
-                string query = "SELECT date, Symbol, open_pos, day_trade, close_pos FROM algotrade.positions where symbol = @symbol order by date desc;";
+                string query = "SELECT  Date, Symbol, open_pos, day_trade, close_pos FROM algotrade.positions where symbol = @symbol order by date desc;";
                 MySqlCommand sqlCommand = new MySqlCommand(query, connection);
                 MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
 
@@ -358,19 +345,11 @@ namespace trading_WPF
             {
                 Log(msg: "...");
                 string query = "select count(*) as Buy from algotrade.trades where quantity > 0 and symbol = @symbol;";
-
-                //$"SELECT count(*) as Buy FROM algotrade.factdata where symbol = @symbol and act = 'Buy' " +
-                //$"and date between (select min(date) FROM algotrade.trades where symbol = @symbol)  and (select max(date) FROM algotrade.trades  where symbol = @symbol);";
-
-                //$"'{start:yyyy-MM-dd}' and '{end:yyyy-MM-dd}';";
-
                 MySqlCommand sqlCommand = new MySqlCommand(query, connection);
                 MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
 
                 using (MysqlDataAdapter)
                 {
-                    //Command.Parameters.Add("@Start_Date", MySqlDbType.Date.);
-
                     sqlCommand.Parameters.AddWithValue("@symbol", symbol);
 
                     DataTable tradesTable = new DataTable();
@@ -461,7 +440,7 @@ namespace trading_WPF
             {
                 Log(msg: "...");
 
-                string query = "SELECT date, Symbol, open_cash, day_cash, close_cash FROM algotrade.cash where symbol = @symbol order by date desc;";
+                string query = "SELECT  date as Date, Symbol, open_cash, day_cash, close_cash FROM algotrade.cash where symbol = @symbol order by Date desc;";
                 MySqlCommand sqlCommand = new MySqlCommand(query, connection);
                 MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
 
@@ -515,12 +494,14 @@ namespace trading_WPF
                 catch //(MySqlException e)
                 {
                     MessageBox.Show("Entry already exists!");
+                    Symbol.Clear();
                 }
             }
 
             else
             {
                 MessageBox.Show("Enter valid symbol!");
+                Symbol.Clear();
             }
         }
 
@@ -550,9 +531,6 @@ namespace trading_WPF
 
                     if (!checkForSQLInjection(SelectedSymbol))
                     {
-
-
-
                         string query = "SELECT count(distinct `SecurityName`) FROM `algotrade`.`symbols`" +
                         //" where `Symbol` = '@SelectedSymbol' ;";
                         " where `Symbol` = '" + SelectedSymbol + "' ;";
@@ -580,7 +558,12 @@ namespace trading_WPF
             return status;
         }
 
-
+        /// <summary>
+        /// SQL injection code sniplet was taken from https://www.c-sharpcorner.com/blogs/check-string-against-sql-injection-in-c-sharp1
+        /// added some more checks to close vulnerability possibilities
+        /// </summary>
+        /// <param name="userInput"></param>
+        /// <returns></returns>
         public static Boolean checkForSQLInjection(string userInput)
 
         {
@@ -589,7 +572,7 @@ namespace trading_WPF
 
             string[] sqlCheckList = { "--", ";--", ";", "/*", "*/", "@@", "@", "char", "nchar", "varchar", "nvarchar", "alter", "begin", "cast",
                                      "create", "cursor", "declare", "delete", "drop", "end", "exec", "execute", "fetch", "insert", "kill", "select",
-                                      "sys", "sysobjects", "syscolumns", "table", "update", "' or 1=1#", "' or 1=1--"};
+                                      "sys", "sysobjects", "syscolumns", "table", "update", "' or 1=1#", "' or 1=1--", "TRUE", "FALSE"};
 
             string CheckString = userInput.Replace("'", "''");
 
@@ -845,7 +828,7 @@ namespace trading_WPF
             }
             else
             {
-                MessageBox.Show("Select START date and END dates correctly!");
+                MessageBox.Show("Select START date and END date correctly!");
             }
 
         }
@@ -877,7 +860,7 @@ namespace trading_WPF
             }
             else
             {
-                MessageBox.Show("Select START date and END dates correctly!");
+                MessageBox.Show("Select START date and END date correctly!");
             }
         }
 
@@ -947,6 +930,7 @@ namespace trading_WPF
             About AboutScreen = new About();
             AboutScreen.Show();
         }
+
 
     }
 }
