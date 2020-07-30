@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace trading_WPF.Trading
@@ -11,7 +12,7 @@ namespace trading_WPF.Trading
     class TradeProcessor : MainWindowScreen
     {
         public DateTime date { get; set; }
-        public string Symbol { get; set; }
+        public new string Symbol { get; set; }
         public double price { get; set; }
         public double dma_50 { get; set; }
         public double dma_200 { get; set; }
@@ -26,7 +27,7 @@ namespace trading_WPF.Trading
         public string trade_date { get; set; }
         private MySqlConnection connection;
         private string connectionString;
-        public string SelectedSymbol;
+        public new string SelectedSymbol;
         string query;
         string query1;
         string QueryDates;
@@ -42,7 +43,7 @@ namespace trading_WPF.Trading
         }
 
 
-        public void TradeExecute(DateTime start, DateTime end)
+        public async Task TradeExecute(DateTime start, DateTime end)
         {
             MainWindowScreen mw = new MainWindowScreen();
             MessageBox.Show("Click OK to start trades simulation run...");
@@ -57,11 +58,13 @@ namespace trading_WPF.Trading
             {
 
                 // Loop for symbols to frocess
-                for (int i = 0; i < mySymbols.Count; i++)
+                //for (int i = 0; i < mySymbols.Count; i++)
+                //{
+                foreach (string SelectedSymbol in mySymbols)
                 {
 
-                    Symbol = (string)mySymbols[i]; // setting property for currently processing symbol
-                                                  
+                    // Symbol = (string)mySymbols[i]; // setting property for currently processing symbol
+                    Symbol = SelectedSymbol;
 
                     CleanData(Symbol);
 
@@ -292,7 +295,7 @@ namespace trading_WPF.Trading
 
 
 
-        public void DbCallSymbols(string query)
+        public new void DbCallSymbols(string query)
         {
 
             try

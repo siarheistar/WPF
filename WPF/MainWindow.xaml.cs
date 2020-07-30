@@ -609,9 +609,6 @@ namespace trading_WPF
                 //Console.WriteLine(myRetParam.Value.ToString());
                 connection.Close();
 
-
-
-
             }
             catch (Exception e)
             {
@@ -622,22 +619,31 @@ namespace trading_WPF
                 MessageBox.Show("Symbol " + @symbol + " removed OK");
             }
 
-            //SymbolsList.SelectedValue = "";
-
+ 
         }
 
         public void CleanData(string SelectedSymbol)
         {
             try
-            {               
-                string query = "call _sp_CleanData('" + SelectedSymbol + "')";
-
-                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+            {
                 connection.Open();
-                sqlCommand.ExecuteScalar();
+                //Set up myCommand to reference stored procedure 'myfunc'
+                MySqlCommand myCommand = new MySqlCommand("_sp_CleanData", connection);
+                myCommand.CommandType = System.Data.CommandType.StoredProcedure;
+
+                //Create input parameter and assign a value
+
+                MySqlParameter myInParam = new MySqlParameter();
+                myInParam.Value = SelectedSymbol;
+                myInParam.ParameterName = "Symbol_short";
+                myCommand.Parameters.Add(myInParam);
+                myInParam.Direction = System.Data.ParameterDirection.Input;
+
+                //Execute the function. ReturnValue parameter receives result of the stored function
+
+                myCommand.ExecuteNonQuery();
                 connection.Close();
                 ShowSymbolsList();
-
             }
             catch (Exception e)
             {
@@ -649,7 +655,6 @@ namespace trading_WPF
             }
 
         }
-
 
 
         public async Task YFinance()
@@ -675,16 +680,16 @@ namespace trading_WPF
 
                     try
                     {
-                        foreach (var candle in history)
+                        foreach (var item in history)
                         {
-                            string date = String.Format("{0:yyyy-MM-dd}", candle.DateTime);
-                            query = "call _sp_FactDataHydrate('" + date + "' ,'" + SelectedSymbol.ToString() + "', " + candle.Open + ", " + candle.High + " , " + candle.Low + " ," + candle.Close + " , " + candle.Volume + ")";
+                            string date = String.Format("{0:yyyy-MM-dd}", item.DateTime);
+                            query = "call _sp_FactDataHydrate('" + date + "' ,'" + SelectedSymbol.ToString() + "', " + item.Open + ", " + item.High + " , " + item.Low + " ," + item.Close + " , " + item.Volume + ")";
 
                             DatabaseCalls(query);
                         }
 
                         string query2 = "create or replace view DMA_50 as SELECT date, symbol,AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc; " +
-                                 "create or replace view DMA_200 as SELECT date, symbol, AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 200 PRECEDING AND 0 FOLLOWING ) DMA_200 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc;";
+                                        "create or replace view DMA_200 as SELECT date, symbol, AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 200 PRECEDING AND 0 FOLLOWING ) DMA_200 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc;";
 
 
                         string query3 = "call _sp_DMACalculation()";
@@ -704,7 +709,7 @@ namespace trading_WPF
                     }
 
                 }
-                MessageBox.Show("Static Data for refreshed!!!");
+                MessageBox.Show("Static Data Refreshed!!!");
             }
             else
             {
@@ -716,8 +721,6 @@ namespace trading_WPF
         {
             try
             {
-
-
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
@@ -859,7 +862,7 @@ namespace trading_WPF
             if (start < end)
             {
                 TradeProcessor tradeProcessor = new TradeProcessor();
-                tradeProcessor.TradeExecute(start, end);
+                await tradeProcessor.TradeExecute(start, end);
                 ShowSymbolsList();
             }
             else

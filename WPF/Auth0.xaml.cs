@@ -20,7 +20,7 @@ namespace WPFAuthentication
 
         public string EmailSelector { get; set; }
         public object SelectedEmail { get; private set; }
-        private string email;
+
         public Auth0Window()
         {
 
