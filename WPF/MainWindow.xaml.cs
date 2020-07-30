@@ -565,45 +565,52 @@ namespace trading_WPF
         /// <param name="userInput"></param>
         /// <returns></returns>
         public static Boolean checkForSQLInjection(string userInput)
-
         {
-
-            bool isSQLInjection = false;
+            userInput = userInput.Replace("'", "''");
 
             string[] sqlCheckList = { "--", ";--", ";", "/*", "*/", "@@", "@", "char", "nchar", "varchar", "nvarchar", "alter", "begin", "cast",
                                      "create", "cursor", "declare", "delete", "drop", "end", "exec", "execute", "fetch", "insert", "kill", "select",
                                       "sys", "sysobjects", "syscolumns", "table", "update", "' or 1=1#", "' or 1=1--", "TRUE", "FALSE"};
 
-            string CheckString = userInput.Replace("'", "''");
+            foreach (var cl in sqlCheckList)
+                if (userInput.IndexOf(cl, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    MessageBox.Show("SQL Injection !!!");
+                    return true;
+                }
 
-            for (int i = 0; i <= sqlCheckList.Length - 1; i++)
-
-            {
-
-                if ((CheckString.IndexOf(sqlCheckList[i],
-
-                    StringComparison.OrdinalIgnoreCase) >= 0))
-
-                { isSQLInjection = true; }
-            }
-
-            return isSQLInjection;
+            return false;
         }
-    
-
 
 
     private void RemoveSymbol()
         {
             try
             {
-                string query = "call _sp_RemoveSymbol('" + @symbol + "')";
-                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
                 connection.Open();
-                sqlCommand.Parameters.AddWithValue("@symbol", SymbolsList.SelectedValue);
-                sqlCommand.ExecuteScalar();
+                //Set up myCommand to reference stored procedure 'myfunc'
+                MySqlCommand myCommand = new MySqlCommand("_sp_RemoveSymbol", connection);
+                myCommand.CommandType = System.Data.CommandType.StoredProcedure;
+
+                //Create input parameter and assign a value
+                MySqlParameter myInParam = new MySqlParameter();
+                myInParam.Value = @symbol;
+                myInParam.ParameterName = "Short_Symbol";
+                myCommand.Parameters.Add(myInParam);
+                myInParam.Direction = System.Data.ParameterDirection.Input;
+
+                ////Create placeholder for return value
+                //MySqlParameter myRetParam = new MySqlParameter();
+                //myRetParam.Direction = System.Data.ParameterDirection.ReturnValue;
+                //myCommand.Parameters.Add(myRetParam);
+
+                //Execute the function. ReturnValue parameter receives result of the stored function
+                myCommand.ExecuteNonQuery();
+                //Console.WriteLine(myRetParam.Value.ToString());
                 connection.Close();
-                ShowSymbolsList();
+
+
+
 
             }
             catch (Exception e)
@@ -615,10 +622,7 @@ namespace trading_WPF
                 MessageBox.Show("Symbol " + @symbol + " removed OK");
             }
 
-            SymbolsList.SelectedValue = "";
-
-
-
+            //SymbolsList.SelectedValue = "";
 
         }
 
@@ -661,22 +665,16 @@ namespace trading_WPF
 
 
             if (mySymbols.Count >= 1 && mySymbols.Count <= Int32.MaxValue) // This code is to check Integer overflow
-            {
-                for (int i = 0; i < mySymbols.Count; i++) 
-                {
-
-                    SelectedSymbol = (string)mySymbols[i]; // setting property for currently processing symbol
-                                        
+            {                
+                foreach (string SelectedSymbol in mySymbols)
+                {                                         
                     var history = await Yahoo.GetHistoricalAsync(SelectedSymbol, start, end, Period.Daily);
                     string query1 = "delete from algotrade.factdata where symbol = '" + SelectedSymbol + "'; ";
-
-
 
                     DatabaseCalls(query1);
 
                     try
                     {
-
                         foreach (var candle in history)
                         {
                             string date = String.Format("{0:yyyy-MM-dd}", candle.DateTime);
@@ -936,7 +934,6 @@ namespace trading_WPF
             About AboutScreen = new About();
             AboutScreen.Show();
         }
-
 
     }
 }
