@@ -615,6 +615,11 @@ namespace trading_WPF
                 MessageBox.Show("Symbol " + @symbol + " removed OK");
             }
 
+            SymbolsList.SelectedValue = "";
+
+
+
+
         }
 
         public void CleanData(string SelectedSymbol)
@@ -843,6 +848,7 @@ namespace trading_WPF
             catch
             {
                 MessageBox.Show("Incorrect symbol");
+                Symbol.Clear();
             }
             finally
             {
