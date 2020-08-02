@@ -56,14 +56,8 @@ namespace trading_WPF.Trading
 
             if (mySymbols.Count >= 1 && mySymbols.Count <= Int32.MaxValue) // This code is to check Integer overflow
             {
-
-                // Loop for symbols to frocess
-                //for (int i = 0; i < mySymbols.Count; i++)
-                //{
                 foreach (string SelectedSymbol in mySymbols)
-                {
-
-                    // Symbol = (string)mySymbols[i]; // setting property for currently processing symbol
+                {                                       
                     Symbol = SelectedSymbol;
 
                     CleanData(Symbol);
@@ -81,8 +75,6 @@ namespace trading_WPF.Trading
                         {
                             myDates.Insert(0, reader.GetValue(0));
                         }
-
-                        //reader.Close();
                     }
                     catch (Exception e)
                     {
@@ -131,8 +123,6 @@ namespace trading_WPF.Trading
                                 }
                                 finally
                                 {
-
-
                                 }
 
 
@@ -192,24 +182,19 @@ namespace trading_WPF.Trading
             string opn_cash_query = "";
 
             open =
-            //"call _sp_OpenPosition('" + trade_date + "', '" + Symbol + "', ClosePosition);";
-            "SELECT  close_pos FROM algotrade.positions where date =  " +
-            "(SELECT distinct date FROM algotrade.factdata WHERE date < '" + trade_date + "' and symbol = '" + Symbol + "' " +
-            "ORDER BY date desc LIMIT 1)  and symbol = '" + Symbol + "'";
+                "SELECT  close_pos FROM algotrade.positions where date =  " +
+                "(SELECT distinct date FROM algotrade.factdata WHERE date < '" + trade_date + "' and symbol = '" + Symbol + "' " +
+                "ORDER BY date desc LIMIT 1)  and symbol = '" + Symbol + "'";
+            
             opn_cash_query =
-            //"call _sp_OpenCash('" + trade_date + "',  '" + Symbol + "', CloseCash);";
-
-            "SELECT  close_cash FROM algotrade.cash where  date = (select max(date) FROM algotrade.cash where symbol = '" + Symbol + "') and symbol = '" + Symbol + "'";
+                "SELECT  close_cash FROM algotrade.cash where  date = (select max(date) FROM algotrade.cash where symbol = '" + Symbol + "') " +
+                "and symbol = '" + Symbol + "'";
 
             string day =
-            //"call _sp_TradeQuantity('" + trade_date + "', '" + Symbol + "', TradeQuantity);";
-
-            "SELECT  quantity FROM algotrade.trades where date = '" + trade_date + "' and symbol = '" + Symbol + "'";
+                "SELECT  quantity FROM algotrade.trades where date = '" + trade_date + "' and symbol = '" + Symbol + "'";
 
 
-            string day_cash_query =
-                //"_sp_Day_Cash_Query('" + trade_date + "', '" + Symbol + "', DayCash)";
-
+            string day_cash_query = 
                 "SELECT settlement_amount  FROM algotrade.trades where date = '" + trade_date + "' and symbol = '" + Symbol + "'";
 
 

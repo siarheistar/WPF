@@ -23,11 +23,7 @@ namespace WPFAuthentication
 
         public Auth0Window()
         {
-
             InitializeComponent();
-            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
-            connection = new MySqlConnection(connectionString);
-            //ShowUsers();
             EmailSelector = ConfigurationManager.AppSettings["EmailSelector"];
             Hide();
             Login();
@@ -46,17 +42,13 @@ namespace WPFAuthentication
 
             var extraParameters = new Dictionary<string, string>();
             extraParameters.Add("connection", "google-oauth2");
-            extraParameters.Add("login_hint", EmailSelector); //SelectedEmail.ToString()
+            extraParameters.Add("login_hint", EmailSelector); 
 
             DisplayResult(await client.LoginAsync(extraParameters));
         }
 
         private void DisplayResult(LoginResult loginResult)
-        {// Display error
-
-         //   MessageBox.Show(loginResult.User.Identity.ToString());
-
-
+        {
             if (!loginResult.IsError)
             {
                 //MessageBox.Show(loginResult.Error.ToString());
@@ -92,53 +84,6 @@ namespace WPFAuthentication
 
         }
 
-
-
-        //private void ShowUsers()
-        //{
-        //    string query = "SELECT email FROM algotrade.users where status = 1;";
-        //    MySqlCommand sqlCommand = new MySqlCommand(query, connection);
-        //    MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
-
-        //    using (MysqlDataAdapter)
-        //    {
-        //        try
-        //        {
-        //            sqlCommand.Parameters.AddWithValue("@email", SelectedEmail);
-        //            DataTable EmailTable = new DataTable();
-        //            MysqlDataAdapter.Fill(EmailTable);
-        //            SelectedEmail = "@email";
-        //            //Log(msg: "finished", guiUpdate: () =>
-        //            {
-        //                UserList.DisplayMemberPath = "email";
-        //                UserList.SelectedValuePath = "email";
-        //                UserList.ItemsSource = EmailTable.DefaultView;
-        //            }
-        //            //);
-
-        //            Hide();
-        //            Login();
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            MessageBox.Show(e.ToString());
-
-        //        }
-        //        finally
-        //        {
-        //            connection.Close();
-        //        }
-        //    }
-
-
-        //}
-
-        //private void ListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        //{
-        //    ShowUsers();
-
-
-        //}
     }
 
 }

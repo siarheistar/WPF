@@ -46,8 +46,6 @@ namespace trading_WPF
 
         }
 
-
-
         private volatile bool symbolListLoading;
         private void ShowSymbolsList()
         {
@@ -145,7 +143,6 @@ namespace trading_WPF
                 MessageBox.Show(e.ToString());
             }
         }
-
 
         private void ShowCash()
         {
@@ -281,7 +278,6 @@ namespace trading_WPF
 
         }
 
-
         private void ShowTrades()
         {
             try
@@ -405,35 +401,6 @@ namespace trading_WPF
 
         }
 
-        //private void ShowFactData()
-        //{
-
-        //    try
-        //    {
-        //        Log(msg: "...");
-        //        string query = "SELECT date, Symbol, lastprice, ACT FROM algotrade.factdata where symbol = @symbol and date between'"+ sd +"' and '"+ ed +"' order by date desc;";
-        //        MySqlCommand sqlCommand = new MySqlCommand(query, connection);
-        //        MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
-
-        //        using (MysqlDataAdapter)
-        //        {
-        //            sqlCommand.Parameters.AddWithValue("@symbol", symbol);
-
-        //            DataTable tradesTable = new DataTable();
-        //            MysqlDataAdapter.Fill(tradesTable);
-
-        //            Log(msg: "finished", guiUpdate: () => { Show_FactData.ItemsSource = tradesTable.DefaultView; });
-
-        //        }
-
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        MessageBox.Show(e.ToString());
-        //    }
-
-        //}
-
         private void ShowDailyCash()
         {
             try
@@ -462,7 +429,6 @@ namespace trading_WPF
             }
 
         }
-
 
         private void AddSymbol()
         {
@@ -504,7 +470,6 @@ namespace trading_WPF
                 Symbol.Clear();
             }
         }
-
 
         private bool ValidateSymbol()
         {
@@ -582,7 +547,6 @@ namespace trading_WPF
             return false;
         }
 
-
     private void RemoveSymbol()
         {
             try
@@ -656,13 +620,21 @@ namespace trading_WPF
 
         }
 
+        /// <summary>
+        /// YFinance() task is designed remove previous data from database for symbols in listbox,
+        /// to retrive historical data from Yahoo Finance , record it in to database,
+        /// calculate DMA_50 and DMA_200 fields for each historical day and calculate 
+        /// trading desision flag
+        /// </summary>
+        /// <returns></returns>
 
         public async Task YFinance()
 
         {
            MessageBox.Show("Click OK to start Historical data download...");
            query = @"SELECT symbol_short FROM algotrade.static where status = 'A'; ";
-            DbCallSymbols(query);
+            DbCallSymbols(query); // application is getting list of symbols with status Active in symbols static file 
+                                  //  (i.e. symbols displayed in symbols listbox in UI
 
             Yahoo.IgnoreEmptyRows = true;
             MySqlCommand sqlCommand = new MySqlCommand(query, connection);
@@ -673,26 +645,29 @@ namespace trading_WPF
             {                
                 foreach (string SelectedSymbol in mySymbols)
                 {                                         
-                    var history = await Yahoo.GetHistoricalAsync(SelectedSymbol, start, end, Period.Daily);
-                    string query1 = "delete from algotrade.factdata where symbol = '" + SelectedSymbol + "'; ";
+                    var history = await Yahoo.GetHistoricalAsync(SelectedSymbol, start, end, Period.Daily); // retrieveing data from Yahoo Finance and placing it in var history
+                    string query1 = "delete from algotrade.factdata where symbol = '" + SelectedSymbol + "'; "; // deleting entry from factdata for selected symbol
 
-                    DatabaseCalls(query1);
+                    DatabaseCalls(query1); // processing database call to remove symbol from factdata table
 
                     try
                     {
-                        foreach (var item in history)
+                        foreach (var item in history) // this cycle is processing data hydration in to facdata table from var history
                         {
                             string date = String.Format("{0:yyyy-MM-dd}", item.DateTime);
-                            query = "call _sp_FactDataHydrate('" + date + "' ,'" + SelectedSymbol.ToString() + "', " + item.Open + ", " + item.High + " , " + item.Low + " ," + item.Close + " , " + item.Volume + ")";
+                            query = "call _sp_FactDataHydrate('" + date + "' ,'" + SelectedSymbol.ToString() + "', " + item.Open + ", " + item.High + " , " + item.Low + " ," + item.Close + " , " + item.Volume + ")";  // composing stored procedure call to insert data in to database table
+                            // data being inserted in to database is not depending on user input. Using direct query composition without Add.Parameter. No SQL injection risk here. And no business value to implement Add.Parameter MySQL DB call
 
                             DatabaseCalls(query);
                         }
 
-                        string query2 = "create or replace view DMA_50 as SELECT date, symbol,AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc; " +
-                                        "create or replace view DMA_200 as SELECT date, symbol, AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 200 PRECEDING AND 0 FOLLOWING ) DMA_200 FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc;";
+                        string query2 = "create or replace view DMA_50 as SELECT date, symbol,AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50 " +       // create assist views calculating DMA_200 and DMA_50. NB !!! : Gearhost network database is not aale to process these views
+                                        "FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc; " +                      // Gearhost doesnt like  following bit: "OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50"
+                                        "create or replace view DMA_200 as SELECT date, symbol, AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 200 PRECEDING AND 0 FOLLOWING ) DMA_200 " +  // Local database is processing these views correctly.
+                                        "FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc;";
 
 
-                        string query3 = "call _sp_DMACalculation()";
+                        string query3 = "call _sp_DMACalculation()"; // Stored procedure updates factdata table with DMA_50 and DMA_200 values using assiting related views
 
                         DatabaseCalls(query2);
                         DatabaseCalls(query3);
@@ -700,16 +675,16 @@ namespace trading_WPF
                     }
                     catch (Exception e)
                     {
-                        MessageBox.Show(e.ToString());
+                        MessageBox.Show(e.ToString()); // displaying exception message if job crashes
                     }
                     finally
                     {
-                        DatabaseCalls(sproc);
-                        CleanData(SelectedSymbol);
+                        DatabaseCalls(sproc); // updating factdata with trading desision flag based on DMA_50 and DMA_200 values
+                        CleanData(SelectedSymbol); // processing data removal from positions, cash and trades tables. making inserts of initial zero values for  positions and cash
                     }
 
                 }
-                MessageBox.Show("Static Data Refreshed!!!");
+                MessageBox.Show("Static Data Refreshed!!!"); // Pop up message when job run completed
             }
             else
             {
