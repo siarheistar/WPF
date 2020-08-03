@@ -494,7 +494,7 @@ namespace trading_WPF
                 if (SelectedSymbol.Length <= 5)
                 {
 
-                    if (!checkForSQLInjection(SelectedSymbol))
+                    if (!CheckForSQLInjection(SelectedSymbol))
                     {
                         string query = "SELECT count(distinct `SecurityName`) FROM `algotrade`.`symbols`" +
                         //" where `Symbol` = '@SelectedSymbol' ;";
@@ -529,7 +529,7 @@ namespace trading_WPF
         /// </summary>
         /// <param name="userInput"></param>
         /// <returns></returns>
-        public static Boolean checkForSQLInjection(string userInput)
+        public static Boolean CheckForSQLInjection(string userInput)
         {
             userInput = userInput.Replace("'", "''");
 
@@ -547,12 +547,12 @@ namespace trading_WPF
             return false;
         }
 
-    private void RemoveSymbol()
+        private void RemoveSymbol() // this is an example of potential SQL injection fix when running stored procedure with parameters
         {
             try
             {
                 connection.Open();
-                //Set up myCommand to reference stored procedure 'myfunc'
+                //Set up myCommand to reference stored procedure '_sp_RemoveSymbol'
                 MySqlCommand myCommand = new MySqlCommand("_sp_RemoveSymbol", connection);
                 myCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
@@ -562,15 +562,9 @@ namespace trading_WPF
                 myInParam.ParameterName = "Short_Symbol";
                 myCommand.Parameters.Add(myInParam);
                 myInParam.Direction = System.Data.ParameterDirection.Input;
-
-                ////Create placeholder for return value
-                //MySqlParameter myRetParam = new MySqlParameter();
-                //myRetParam.Direction = System.Data.ParameterDirection.ReturnValue;
-                //myCommand.Parameters.Add(myRetParam);
-
-                //Execute the function. ReturnValue parameter receives result of the stored function
+               
+                //Execute the SPROC.
                 myCommand.ExecuteNonQuery();
-                //Console.WriteLine(myRetParam.Value.ToString());
                 connection.Close();
 
             }
@@ -581,9 +575,7 @@ namespace trading_WPF
             finally
             {
                 MessageBox.Show("Symbol " + @symbol + " removed OK");
-            }
-
- 
+            }        
         }
 
         public void CleanData(string SelectedSymbol)
@@ -591,7 +583,7 @@ namespace trading_WPF
             try
             {
                 connection.Open();
-                //Set up myCommand to reference stored procedure 'myfunc'
+                //Set up myCommand to reference stored procedure '_sp_CleanData'
                 MySqlCommand myCommand = new MySqlCommand("_sp_CleanData", connection);
                 myCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
@@ -710,11 +702,6 @@ namespace trading_WPF
             {
                 MessageBox.Show(e.ToString());
             }
-            finally
-            {
-
-            }
-
         }
 
         private volatile bool loading;
@@ -854,9 +841,6 @@ namespace trading_WPF
             {
                 ed = String.Format("{0:yyyy-MM-dd}", today);
             }
-            else
-            {
-            }
         }
         public void DbCallSymbols(string query)
         {
@@ -882,7 +866,7 @@ namespace trading_WPF
             {
                 connection.Close();
             }
-
+             
         }
 
         private void StartDate_OnSelectedDateChanged(object sender, SelectionChangedEventArgs e)

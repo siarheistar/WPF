@@ -153,3 +153,12 @@ C:\Users\Sergei\Downloads\wpf-winforms-01-login (1)\quickstart\00-starter-seed\W
 C:\Users\Sergei\Downloads\wpf-winforms-01-login (1)\quickstart\00-starter-seed\WPF\obj\Debug\AlgoTrade_WPF.csproj.CopyComplete
 C:\Users\Sergei\Downloads\wpf-winforms-01-login (1)\quickstart\00-starter-seed\WPF\obj\Debug\WPFSample.exe
 C:\Users\Sergei\Downloads\wpf-winforms-01-login (1)\quickstart\00-starter-seed\WPF\obj\Debug\WPFSample.pdb
+C:\project\github\WPF\WPF\bin\Debug\trading_WPF.exe
+C:\project\github\WPF\WPF\bin\Debug\CsvHelper.dll
+C:\project\github\WPF\WPF\bin\Debug\Flurl.dll
+C:\project\github\WPF\WPF\bin\Debug\Flurl.Http.dll
+C:\project\github\WPF\WPF\bin\Debug\MySql.Data.dll
+C:\project\github\WPF\WPF\bin\Debug\Newtonsoft.Json.dll
+C:\project\github\WPF\WPF\bin\Debug\YahooFinanceApi.dll
+C:\project\github\WPF\WPF\bin\Debug\System.Net.Http.dll
+C:\project\github\WPF\WPF\bin\Debug\System.ValueTuple.dll

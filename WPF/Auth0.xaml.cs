@@ -15,9 +15,6 @@ namespace WPFAuthentication
     {
         public Auth0Client client;
 
-        private readonly MySqlConnection connection;
-        private readonly string connectionString;
-
         public string EmailSelector { get; set; }
         public object SelectedEmail { get; private set; }
 

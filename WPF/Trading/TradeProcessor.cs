@@ -11,23 +11,23 @@ namespace trading_WPF.Trading
 {
     class TradeProcessor : MainWindowScreen
     {
-        public DateTime date { get; set; }
+        public DateTime Date { get; set; }
         public new string Symbol { get; set; }
-        public double price { get; set; }
-        public double dma_50 { get; set; }
-        public double dma_200 { get; set; }
-        public string act { get; set; }
-        public double open_pos { get; set; }
-        public double close_pos { get; set; }
-        public double open_cash { get; set; }
-        public double close_cash { get; set; }
-        public double day_trade { get; set; }
-        public double day_cash { get; set; }
-        public DateTime min_date { get; set; }
-        public string trade_date { get; set; }
-        private MySqlConnection connection;
-        private string connectionString;
-        public new string SelectedSymbol;
+        public double Price { get; set; }
+        public double DMA_50 { get; set; }
+        public double DMA_200 { get; set; }
+        public string ACT { get; set; }
+        public double Open_pos { get; set; }
+        public double Close_pos { get; set; }
+        public double Open_cash { get; set; }
+        public double Close_cash { get; set; }
+        public double Day_trade { get; set; }
+        public double Day_cash { get; set; }
+        public DateTime Min_date { get; set; }
+        public string Trade_date { get; set; }
+        private readonly MySqlConnection connection;
+        private readonly string connectionString;
+       // public new string SelectedSymbol;
         string query;
         string query1;
         string QueryDates;
@@ -42,7 +42,12 @@ namespace trading_WPF.Trading
             connection = new MySqlConnection(connectionString);
         }
 
-
+        /// <summary>
+        /// This method performs trading data analysis and trades execution
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
         public async Task TradeExecute(DateTime start, DateTime end)
         {
             MainWindowScreen mw = new MainWindowScreen();
@@ -50,9 +55,9 @@ namespace trading_WPF.Trading
                             
 
             /// SQL query below takes only active symbols in static table and only those symbols containing factdata entries
-            query = @"SELECT distinct st.symbol_short FROM algotrade.static st, algotrade.factdata fd where st.status = 'A' and fd.symbol = st.symbol_short; ";
+            query = @"SELECT distinct st.symbol_short FROM algotrade.static st, algotrade.factdata fd where st.status = 'A' 
+                      and fd.symbol = st.symbol_short; ";
             DbCallSymbols(query);
-
 
             if (mySymbols.Count >= 1 && mySymbols.Count <= Int32.MaxValue) // This code is to check Integer overflow
             {
@@ -92,28 +97,24 @@ namespace trading_WPF.Trading
                     var startdate = Convert.ToDateTime(DbCallDate(query_sdate));
                     var enddate = Convert.ToDateTime(DbCallDate(query_ed));
 
-
-
                     foreach (DateTime day in EachCalendarDay(startdate, enddate))
                     {
                         if (myDates.Contains(day))
                         {
-
-                            trade_date = String.Format("{0:yyyy-MM-dd}", day);
+                            Trade_date = String.Format("{0:yyyy-MM-dd}", day);
 
                             query1 = @"SELECT date, symbol, lastPrice, DMA_50, DMA_200, ACT FROM algotrade.factdata where symbol = '" + Symbol + "' and date = '" + String.Format("{0:yyyy-MM-dd}", day) + "';";
 
                             DbCall(query1);
 
-
-                            if (act.Equals("Buy"))
+                            if (ACT.Equals("Buy"))
                             {
                                 try
                                 {
-                                    buy_update = "call _sp_BuyUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "')";
+                                    buy_update = "call _sp_BuyUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(Price, 2) + "')";
                                     mw.DatabaseCalls(buy_update);
-                                    pos_and_cash_calc();
-                                    string PosAndCashUpdate = "call _sp_BuyPosAndCashUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "', '" + Math.Round(open_pos, 2) + "', '" + Math.Round(day_trade, 2) + "', '" + Math.Round(close_pos, 2) + "',  '" + Math.Round(open_cash, 2) + "', '" + Math.Round(day_cash, 2) + "', '" + Math.Round(close_cash, 2) + "')";
+                                    Pos_and_cash_calc();
+                                    string PosAndCashUpdate = "call _sp_BuyPosAndCashUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(Price, 2) + "', '" + Math.Round(Open_pos, 2) + "', '" + Math.Round(Day_trade, 2) + "', '" + Math.Round(Close_pos, 2) + "',  '" + Math.Round(Open_cash, 2) + "', '" + Math.Round(Day_cash, 2) + "', '" + Math.Round(Close_cash, 2) + "')";
                                     mw.DatabaseCalls(PosAndCashUpdate);
                                 }
                                 catch (NullReferenceException e)
@@ -121,38 +122,26 @@ namespace trading_WPF.Trading
                                     MessageBox.Show(e.ToString());
                                     throw;
                                 }
-                                finally
-                                {
-                                }
-
-
                             }
 
-                            else if (act.Equals("Sell"))
+                            else if (ACT.Equals("Sell"))
                             {
                                 try
                                 {
-
-
-                                    pos_and_cash_calc();
-                                    if (open_pos >= 1)
+                                    Pos_and_cash_calc();
+                                    if (Open_pos >= 1)
                                     {
-                                        sell_update = "call _sp_SellUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "')";
+                                        sell_update = "call _sp_SellUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(Price, 2) + "')";
                                         mw.DatabaseCalls(sell_update);
-                                        pos_and_cash_calc();
-                                        string PosAndCashUpdate = "call _sp_SellPosAndCashUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(price, 2) + "', '" + Math.Round(open_pos, 2) + "', '" + Math.Round(day_trade, 2) + "', '" + Math.Round(close_pos, 2) + "',  '" + Math.Round(open_cash, 2) + "', '" + Math.Round(day_cash, 2) + "', '" + Math.Round(close_cash, 2) + "')";
+                                        Pos_and_cash_calc();
+                                        string PosAndCashUpdate = "call _sp_SellPosAndCashUpdate('" + String.Format("{0:yyyy-MM-dd}", day) + "', '" + Symbol + "', '" + Math.Round(Price, 2) + "', '" + Math.Round(Open_pos, 2) + "', '" + Math.Round(Day_trade, 2) + "', '" + Math.Round(Close_pos, 2) + "',  '" + Math.Round(Open_cash, 2) + "', '" + Math.Round(Day_cash, 2) + "', '" + Math.Round(Close_cash, 2) + "')";
                                         mw.DatabaseCalls(PosAndCashUpdate);
-
                                     }
-
                                 }
                                 catch (NullReferenceException e)
                                 {
                                     MessageBox.Show(e.ToString());
                                     throw;
-                                }
-                                finally
-                                {
                                 }
                             }
                         }
@@ -162,59 +151,53 @@ namespace trading_WPF.Trading
             }
 
             MessageBox.Show("Trade analysis completed!!!");
+            await Task.CompletedTask;
 
-        }
-
+        } // This is IEnumerable generating dates in range
 
         public IEnumerable<DateTime> EachCalendarDay(DateTime startDate, DateTime endDate)
         {
             for (var date = startDate.Date; date.Date <= endDate.Date; date = date.AddDays(1)) yield
             return date;
-        }
+        } //This is IEnumerable generating dates in range
 
-
-        public void pos_and_cash_calc()
+        public void Pos_and_cash_calc() //Method calculates open, day and close values for positions and cash. 
         {
-            open_pos = 0;
+            Open_pos = 0;
 
-
-            string open = "";
-            string opn_cash_query = "";
-
-            open =
+            string Open =
                 "SELECT  close_pos FROM algotrade.positions where date =  " +
-                "(SELECT distinct date FROM algotrade.factdata WHERE date < '" + trade_date + "' and symbol = '" + Symbol + "' " +
+                "(SELECT distinct date FROM algotrade.factdata WHERE date < '" + Trade_date + "' and symbol = '" + Symbol + "' " +
                 "ORDER BY date desc LIMIT 1)  and symbol = '" + Symbol + "'";
-            
-            opn_cash_query =
+
+            string Opn_cash_query =
                 "SELECT  close_cash FROM algotrade.cash where  date = (select max(date) FROM algotrade.cash where symbol = '" + Symbol + "') " +
                 "and symbol = '" + Symbol + "'";
 
-            string day =
-                "SELECT  quantity FROM algotrade.trades where date = '" + trade_date + "' and symbol = '" + Symbol + "'";
+            string Day =
+                "SELECT  quantity FROM algotrade.trades where date = '" + Trade_date + "' and symbol = '" + Symbol + "'";
 
 
-            string day_cash_query = 
-                "SELECT settlement_amount  FROM algotrade.trades where date = '" + trade_date + "' and symbol = '" + Symbol + "'";
+            string Day_cash_query = 
+                "SELECT settlement_amount  FROM algotrade.trades where date = '" + Trade_date + "' and symbol = '" + Symbol + "'";
 
 
-            open_pos = DBA(open);
-            day_trade = DBA(day);
-            close_pos = open_pos + day_trade;
+            Open_pos = DBA(Open);
+            Day_trade = DBA(Day);
+            Close_pos = Open_pos + Day_trade;
 
-            if (close_pos < 0)
+            if (Close_pos < 0)
             {
-                open_pos = 0;
-                day_trade = 0;
-                close_pos = 0;
-                day_cash = 0;
+                Open_pos = 0;
+                Day_trade = 0;
+                Close_pos = 0;
+                Day_cash = 0;
             }
 
-            open_cash = DBA(opn_cash_query);
-            day_cash = DBA(day_cash_query);
-            close_cash = open_cash + day_cash;
+            Open_cash = DBA(Opn_cash_query);
+            Day_cash = DBA(Day_cash_query);
+            Close_cash = Open_cash + Day_cash;
         }
-
 
         public void DbCall(string query)
         {
@@ -228,12 +211,12 @@ namespace trading_WPF.Trading
 
                 while (reader.Read())
                 {
-                    date = (DateTime)reader.GetValue(0);
+                    Date = (DateTime)reader.GetValue(0);
                     string Sym = (string)reader.GetValue(1);
-                    price = Convert.ToDouble(reader.GetValue(2));
-                    dma_50 = (double)reader.GetValue(3);
-                    dma_200 = (double)reader.GetValue(4);
-                    act = (string)reader.GetValue(5);
+                    Price = Convert.ToDouble(reader.GetValue(2));
+                    DMA_50 = (double)reader.GetValue(3);
+                    DMA_200 = (double)reader.GetValue(4);
+                    ACT = (string)reader.GetValue(5);
 
                 }
                 reader.Close();
@@ -246,8 +229,7 @@ namespace trading_WPF.Trading
             {
                 connection.Close();
             }
-        }
-
+        }  //Method reads data from factdata table for TradeExecute() 
 
         public DateTime DbCallDate(string query)
         {
@@ -261,7 +243,7 @@ namespace trading_WPF.Trading
 
                 while (reader.Read())
                 {
-                    min_date = (DateTime)reader.GetValue(0);
+                    Min_date = (DateTime)reader.GetValue(0);
                 }
                 reader.Close();
             }
@@ -273,12 +255,8 @@ namespace trading_WPF.Trading
             {
                 connection.Close();
             }
-            return min_date;
-        }
-
-
-
-
+            return Min_date;
+        } //Method is used to calculate nearest dates to start date and end date based on dates in factdata for selected symbol
 
         public new void DbCallSymbols(string query)
         {
@@ -305,9 +283,9 @@ namespace trading_WPF.Trading
                 connection.Close();
             }
 
-        }
+        } //Method used for establishing active symbols in static and for which there are entries in factdata
 
-        public double DBA(string query)
+        public double DBA(string query) // Method used for calculation for posi-tions and cash values for selected symbol
         {
             double some_value = 0;
 
@@ -351,6 +329,6 @@ namespace trading_WPF.Trading
             {
                 MessageBox.Show(ed);
             }
-        }
+        } // Method validates End date value and assigns current date value if it is greater than current date
     }
 }
