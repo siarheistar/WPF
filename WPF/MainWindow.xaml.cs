@@ -22,7 +22,7 @@ namespace trading_WPF
         public string SelectedSymbol;
         string query;
         bool status = false;
-        ArrayList mySymbols = new ArrayList();
+        private readonly ArrayList mySymbols = new ArrayList();
         readonly string sproc = "call _sp_ACT();";
         private DateTime start;
         private DateTime end;
@@ -553,15 +553,19 @@ namespace trading_WPF
             {
                 connection.Open();
                 //Set up myCommand to reference stored procedure '_sp_RemoveSymbol'
-                MySqlCommand myCommand = new MySqlCommand("_sp_RemoveSymbol", connection);
-                myCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                MySqlCommand myCommand = new MySqlCommand("_sp_RemoveSymbol", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 //Create input parameter and assign a value
-                MySqlParameter myInParam = new MySqlParameter();
-                myInParam.Value = @symbol;
-                myInParam.ParameterName = "Short_Symbol";
+                MySqlParameter myInParam = new MySqlParameter
+                {
+                    Value = @symbol,
+                    ParameterName = "Short_Symbol"
+                };
                 myCommand.Parameters.Add(myInParam);
-                myInParam.Direction = System.Data.ParameterDirection.Input;
+                myInParam.Direction = ParameterDirection.Input;
                
                 //Execute the SPROC.
                 myCommand.ExecuteNonQuery();
@@ -584,14 +588,18 @@ namespace trading_WPF
             {
                 connection.Open();
                 //Set up myCommand to reference stored procedure '_sp_CleanData'
-                MySqlCommand myCommand = new MySqlCommand("_sp_CleanData", connection);
-                myCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                MySqlCommand myCommand = new MySqlCommand("_sp_CleanData", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 //Create input parameter and assign a value
 
-                MySqlParameter myInParam = new MySqlParameter();
-                myInParam.Value = SelectedSymbol;
-                myInParam.ParameterName = "Symbol_short";
+                MySqlParameter myInParam = new MySqlParameter
+                {
+                    Value = SelectedSymbol,
+                    ParameterName = "Symbol_short"
+                };
                 myCommand.Parameters.Add(myInParam);
                 myInParam.Direction = System.Data.ParameterDirection.Input;
 
@@ -629,9 +637,7 @@ namespace trading_WPF
                                   //  (i.e. symbols displayed in symbols listbox in UI
 
             Yahoo.IgnoreEmptyRows = true;
-            MySqlCommand sqlCommand = new MySqlCommand(query, connection);
-            MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
-
+            MySqlCommand sqlCommand = new MySqlCommand(query, connection);  //MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
 
             if (mySymbols.Count >= 1 && mySymbols.Count <= Int32.MaxValue) // This code is to check Integer overflow
             {                
@@ -839,7 +845,7 @@ namespace trading_WPF
 
             if (Convert.ToDateTime(ed) > today)
             {
-                ed = String.Format("{0:yyyy-MM-dd}", today);
+                ed = $"{today:yyyy-MM-dd}";
             }
         }
         public void DbCallSymbols(string query)
@@ -896,6 +902,5 @@ namespace trading_WPF
             About AboutScreen = new About();
             AboutScreen.Show();
         }
-
     }
 }

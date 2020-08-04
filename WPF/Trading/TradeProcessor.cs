@@ -33,8 +33,8 @@ namespace trading_WPF.Trading
         string QueryDates;
         string buy_update;
         string sell_update;
-        ArrayList mySymbols = new ArrayList();
-        ArrayList myDates = new ArrayList();
+        private ArrayList mySymbols = new ArrayList();
+        private ArrayList myDates = new ArrayList();
 
         public TradeProcessor()
         {

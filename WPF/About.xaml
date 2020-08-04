@@ -23,7 +23,8 @@
         <RichTextBox Grid.Column="1" Margin="10,10,10,5">
             <FlowDocument>
                 <Paragraph FontSize="12" FontFamily="Arial" Margin="0">
-               <Run Text="Siarhei Staravoitau"/><LineBreak/><Run/><LineBreak/><Run Text="HDCYBSEPOL"/><LineBreak/><Run Text="NCI"/><LineBreak/><Run/><LineBreak/><Run/><LineBreak/><Run Text="https://www.linkedin.com/in/siarhei-staravoitau/"/>
+               <Run Text="Siarhei Staravoitau"/><LineBreak/><Run/><LineBreak/><Run Text="HDCYBSEPOL"/><LineBreak/><Run Text="NCI"/>
+                    <LineBreak/><Run/><LineBreak/><Run/><LineBreak/><Run Text="https://www.linkedin.com/in/siarhei-staravoitau/"/>
                     <LineBreak/><Run/><LineBreak/><Run Text="siarhei.star@gmail.com"/><LineBreak/><Run/><LineBreak/><Run Text=""/>
             </Paragraph>
             </FlowDocument>
@@ -32,7 +33,9 @@
         <RichTextBox HorizontalAlignment="Left" Height="231" VerticalAlignment="Top" Width="324" Margin="10,10,0,0">
             <FlowDocument>
                 <Paragraph FontSize="11" FontFamily="Arial" Margin="0">
-                    <Run Text="Algorithmic Trading Simulator Application is designed to perform analysis of historical finance data from Yahoo finance using one of the financial technical analysis algorithms, process trade using this data, maintain trade results (trade booking, positions, cash) and provide trading activity reports."/>
+                    <Run Text="Algorithmic Trading Simulator Application is designed to perform analysis of historical finance 
+                         data from Yahoo finance using one of the financial technical analysis algorithms, process trade using this data, 
+                         maintain trade results (trade booking, positions, cash) and provide trading activity reports."/>
                 </Paragraph>
                 <Paragraph FontSize="11" FontFamily="Arial" Margin="0">
                     <Run/>
@@ -44,11 +47,14 @@
                     <Run/>
                 </Paragraph>
                 <Paragraph FontSize="11" FontFamily="Arial" Margin="0">
-                    <Run NumberSubstitution.CultureSource="User" FontSize="11" FontFamily="Arial" Text="Project developed in both WPF version and MVC dotnetcore 3.1 web application (as a bonus). Authentication is done using Auth0.com authentication service integration with multiple factor authorization."/>
+                    <Run NumberSubstitution.CultureSource="User" FontSize="11" FontFamily="Arial" Text="Project developed in both WPF version and 
+                         MVC dotnetcore 3.1 web application (as a bonus). Authentication is done using Auth0.com authentication service integration
+                         with multiple factor authorization."/>
                 </Paragraph>
             </FlowDocument>
         </RichTextBox>
-        <TextBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" Name="CurrentDate" Text="{Binding Source={x:Static system:DateTime.Now},  StringFormat='dd-MM-yyyy',Mode=OneWay}" Margin="200,87,10,10" Width="66"/>
+        <TextBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" Name="CurrentDate" Text="{Binding Source={x:Static system:DateTime.Now}, 
+            StringFormat='dd-MM-yyyy',Mode=OneWay}" Margin="200,87,10,10" Width="66"/>
         <Image Grid.Column="1" Grid.Row="1" Source="/Assets/nciLogo.png" HorizontalAlignment="Left" Width="120"/>  
 
 

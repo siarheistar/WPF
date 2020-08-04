@@ -37,9 +37,11 @@ namespace WPFAuthentication
                 ClientId = clientId
             });
 
-            var extraParameters = new Dictionary<string, string>();
-            extraParameters.Add("connection", "google-oauth2");
-            extraParameters.Add("login_hint", EmailSelector); 
+            var extraParameters = new Dictionary<string, string>
+            {
+                { "connection", "google-oauth2" },
+                { "login_hint", EmailSelector }
+            };
 
             DisplayResult(await client.LoginAsync(extraParameters));
         }
@@ -49,8 +51,10 @@ namespace WPFAuthentication
             if (!loginResult.IsError)
             {
                 //MessageBox.Show(loginResult.Error.ToString());
-                MainWindowScreen mws = new MainWindowScreen();
-                mws.LoginForm = this;
+                MainWindowScreen mws = new MainWindowScreen
+                {
+                    LoginForm = this
+                };
                 mws.Show();
             }
             else if(loginResult.Error.ToString().Equals("unauthorized"))
