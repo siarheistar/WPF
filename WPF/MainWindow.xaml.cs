@@ -11,6 +11,9 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using System.Collections;
 using WPFAuthentication;
+using System.Security.Cryptography;
+using System.Text;
+using System.Linq;
 
 namespace trading_WPF
 {
@@ -23,26 +26,26 @@ namespace trading_WPF
         string query;
         bool status = false;
         private readonly ArrayList mySymbols = new ArrayList();
-        readonly string sproc = "call _sp_ACT();";
-        private DateTime start;
-        private DateTime end;
-
+        readonly string sproc = "call _sp_ACT();"; // stored procedure to calculate trading desision flag
+        private DateTime start;                   // start date variable to read data from datepicker 
+        private DateTime end;                     // end date  variable to read data from datepicker 
+       
         public Auth0Window LoginForm;
         public About AboutForm;
-
-
 
         public MainWindowScreen()
         {
             InitializeComponent();
-            StartDate.SelectedDate = DateTime.Today.AddDays(-366);
-            EndDate.SelectedDate = DateTime.Today.AddDays(-1);
-            start = StartDate.SelectedDate.Value;
-            end = EndDate.SelectedDate.Value;
+            StartDate.SelectedDate = DateTime.Today.AddDays(-366); // set up default start date in datepicker
+            EndDate.SelectedDate = DateTime.Today.AddDays(-1); // set up default end date in datepicker
+            start = StartDate.SelectedDate.Value;              // read date from datepicker when changed
+            end = EndDate.SelectedDate.Value;                  // read date from datepicker when changed
+            //HashPass = Hash("Belgard24");
+            //Console.WriteLine(HashPass); // d650ffa7c402a8fdde03cdc77a6b73c74b471ebf
             connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
             connection = new MySqlConnection(connectionString);
 
-            ShowSymbolsList();
+            ShowSymbolsList(); // refresh symbols in symbol listbox
 
         }
 
@@ -432,95 +435,99 @@ namespace trading_WPF
 
         private void AddSymbol()
         {
-
-            ValidateSymbol();
-
-            if (status)
+            try
             {
-                try
+                Log(msg: $"...");
+                ValidateSymbol();
+
+                if (status)
                 {
-                    string query = "call _sp_AddSymbol(@symbol_short)";
-
-                    MySqlCommand sqlCommand1 = new MySqlCommand(query, connection);
-                    MySqlDataAdapter MysqlDataAdapter1 = new MySqlDataAdapter(sqlCommand1);
-
-                    using (MysqlDataAdapter1)
+                    try
                     {
-                        sqlCommand1.Parameters.AddWithValue("@symbol_short", Symbol.Text.ToUpper());
+                        string query = "call _sp_AddSymbol(@symbol_short)";
 
-                        DataTable symbolsTable = new DataTable();
-                        MysqlDataAdapter1.Fill(symbolsTable);
-                        SymbolsList.DisplayMemberPath = "symbol_short";
-                        SymbolsList.SelectedValuePath = "symbol_short";
-                        SymbolsList.ItemsSource = symbolsTable.DefaultView;
+                        MySqlCommand sqlCommand1 = new MySqlCommand(query, connection);
+                        MySqlDataAdapter MysqlDataAdapter1 = new MySqlDataAdapter(sqlCommand1);
 
+                        using (MysqlDataAdapter1)
+                        {
+                            sqlCommand1.Parameters.AddWithValue("@symbol_short", Symbol.Text.ToUpper());
+
+                            DataTable symbolsTable = new DataTable();
+                            MysqlDataAdapter1.Fill(symbolsTable);
+                            SymbolsList.DisplayMemberPath = "symbol_short";
+                            SymbolsList.SelectedValuePath = "symbol_short";
+                            SymbolsList.ItemsSource = symbolsTable.DefaultView;
+
+                        }
+                        Symbol.Clear();
                     }
-                    Symbol.Clear();
+                catch 
+                    {
+                        MessageBox.Show("Entry already exists!");
+                        Symbol.Clear();
+                    }
                 }
-                catch //(MySqlException e)
+
+                else
                 {
-                    MessageBox.Show("Entry already exists!");
+                    MessageBox.Show("Enter valid symbol!");
                     Symbol.Clear();
                 }
             }
-
-            else
+            catch (Exception e)
             {
-                MessageBox.Show("Enter valid symbol!");
-                Symbol.Clear();
+                MessageBox.Show(e.ToString());
             }
         }
 
         private bool ValidateSymbol()
         {
-            status = false;
-            TradeProcessor tp = new TradeProcessor();
-
-            MySqlCommand sqlCommand = new MySqlCommand(query, connection);
-            MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
-            using (MysqlDataAdapter)
-            {
-                sqlCommand.Parameters.AddWithValue("@symbol", Symbol.Text.ToString());
-
-                try
+                status = false;
+                TradeProcessor tp = new TradeProcessor();
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);
+                MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+                using (MysqlDataAdapter)
                 {
-                    SelectedSymbol = Symbol.Text.ToString();
-                }
-                catch  //NullReferenceException e
-                {
-                    MessageBox.Show("Please select Symbol");
-                }
+                    sqlCommand.Parameters.AddWithValue("@symbol", Symbol.Text.ToString());
 
-                if (SelectedSymbol.Length <= 5)
-                {
-
-                    if (!CheckForSQLInjection(SelectedSymbol))
+                    try
                     {
-                        string query = "SELECT count(distinct `SecurityName`) FROM `algotrade`.`symbols`" +
-                        //" where `Symbol` = '@SelectedSymbol' ;";
-                        " where `Symbol` = '" + SelectedSymbol + "' ;";
+                        SelectedSymbol = Symbol.Text.ToString();
+                    }
+                    catch  //NullReferenceException e
+                    {
+                        MessageBox.Show("Please select Symbol");
+                    }
 
+                    if (SelectedSymbol.Length <= 5)
+                    {
 
-                        if (tp.DBA(query) > 0)
+                        if (!CheckForSQLInjection(SelectedSymbol))
                         {
-                            status = true;
+                            string query = "SELECT count(distinct `SecurityName`) FROM `algotrade`.`symbols` where `Symbol` = '" + SelectedSymbol + "' ;";
+
+
+                            if (tp.DBA(query) > 0)
+                            {
+                                status = true;
+                            }
+                        }
+                        else
+                        {
+                            status = false;
+                            Symbol.Clear();
                         }
                     }
                     else
                     {
                         status = false;
+                        MessageBox.Show("Please enter Symbol with correct number of characters!");
                         Symbol.Clear();
                     }
-                }
-                else
-                {
-                    status = false;
-                    MessageBox.Show("Please enter Symbol with correct number of characters!");
-                    Symbol.Clear();
-                }
 
-            }
-            return status;
+                }
+                return status;
         }
 
         /// <summary>
@@ -528,7 +535,7 @@ namespace trading_WPF
         /// added some more checks to close vulnerability possibilities
         /// </summary>
         /// <param name="userInput"></param>
-        /// <returns></returns>
+        /// <returns>SQL Injection</returns>
         public static Boolean CheckForSQLInjection(string userInput)
         {
             userInput = userInput.Replace("'", "''");
@@ -626,67 +633,77 @@ namespace trading_WPF
         /// calculate DMA_50 and DMA_200 fields for each historical day and calculate 
         /// trading desision flag
         /// </summary>
-        /// <returns></returns>
+        /// <returns>YFinance</returns>
 
         public async Task YFinance()
 
         {
-           MessageBox.Show("Click OK to start Historical data download...");
-           query = @"SELECT symbol_short FROM algotrade.static where status = 'A'; ";
-            DbCallSymbols(query); // application is getting list of symbols with status Active in symbols static file 
+
+            try
+            {
+                Log(msg: "...");
+
+                MessageBox.Show("Click OK to start Historical data download...");
+                query = @"SELECT symbol_short FROM algotrade.static where status = 'A'; ";
+                DbCallSymbols(query); // application is getting list of symbols with status Active in symbols static file 
                                   //  (i.e. symbols displayed in symbols listbox in UI
 
-            Yahoo.IgnoreEmptyRows = true;
-            MySqlCommand sqlCommand = new MySqlCommand(query, connection);  //MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
+                Yahoo.IgnoreEmptyRows = true;
+                MySqlCommand sqlCommand = new MySqlCommand(query, connection);  //MySqlDataAdapter MysqlDataAdapter = new MySqlDataAdapter(sqlCommand);
 
-            if (mySymbols.Count >= 1 && mySymbols.Count <= Int32.MaxValue) // This code is to check Integer overflow
-            {                
-                foreach (string SelectedSymbol in mySymbols)
-                {                                         
-                    var history = await Yahoo.GetHistoricalAsync(SelectedSymbol, start, end, Period.Daily); // retrieveing data from Yahoo Finance and placing it in var history
-                    string query1 = "delete from algotrade.factdata where symbol = '" + SelectedSymbol + "'; "; // deleting entry from factdata for selected symbol
+                if (mySymbols.Count >= 1 && mySymbols.Count <= Int32.MaxValue) // This code is to check Integer overflow
+                {                
+                    foreach (string SelectedSymbol in mySymbols)
+                    {                                         
+                        var history = await Yahoo.GetHistoricalAsync(SelectedSymbol, start, end, Period.Daily); // retrieveing data from Yahoo Finance and placing it in var history
+                        string query1 = "delete from algotrade.factdata where symbol = '" + SelectedSymbol + "'; "; // deleting entry from factdata for selected symbol
 
-                    DatabaseCalls(query1); // processing database call to remove symbol from factdata table
+                        DatabaseCalls(query1); // processing database call to remove symbol from factdata table
 
-                    try
-                    {
-                        foreach (var item in history) // this cycle is processing data hydration in to facdata table from var history
+                        try
                         {
-                            string date = String.Format("{0:yyyy-MM-dd}", item.DateTime);
-                            query = "call _sp_FactDataHydrate('" + date + "' ,'" + SelectedSymbol.ToString() + "', " + item.Open + ", " + item.High + " , " + item.Low + " ," + item.Close + " , " + item.Volume + ")";  // composing stored procedure call to insert data in to database table
-                            // data being inserted in to database is not depending on user input. Using direct query composition without Add.Parameter. No SQL injection risk here. And no business value to implement Add.Parameter MySQL DB call
+                            foreach (var item in history) // this cycle is processing data hydration in to facdata table from var history
+                            {
+                                string date = String.Format("{0:yyyy-MM-dd}", item.DateTime);
+                                query = "call _sp_FactDataHydrate('" + date + "' ,'" + SelectedSymbol.ToString() + "', " + item.Open + ", " + item.High + " , " + item.Low + " ," + item.Close + " , " + item.Volume + ")";  // composing stored procedure call to insert data in to database table
+                                // data being inserted in to database is not depending on user input. Using direct query composition without Add.Parameter. No SQL injection risk here. And no business value to implement Add.Parameter MySQL DB call
 
-                            DatabaseCalls(query);
+                                DatabaseCalls(query);
+                            }
+
+                            string query2 = "create or replace view DMA_50 as SELECT date, symbol,AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50 " +       // create assist views calculating DMA_200 and DMA_50. NB !!! : Gearhost network database is not aale to process these views
+                                            "FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc; " +                      // Gearhost doesnt like  following bit: "OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50"
+                                            "create or replace view DMA_200 as SELECT date, symbol, AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 200 PRECEDING AND 0 FOLLOWING ) DMA_200 " +  // Local database is processing these views correctly.
+                                            "FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc;";
+
+
+                            string query3 = "call _sp_DMACalculation()"; // Stored procedure updates factdata table with DMA_50 and DMA_200 values using assiting related views
+
+                            DatabaseCalls(query2);
+                            DatabaseCalls(query3);
+
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show(e.ToString()); // displaying exception message if job crashes
+                        }
+                        finally
+                        {
+                            DatabaseCalls(sproc); // updating factdata with trading desision flag based on DMA_50 and DMA_200 values
+                            CleanData(SelectedSymbol); // processing data removal from positions, cash and trades tables. making inserts of initial zero values for  positions and cash
                         }
 
-                        string query2 = "create or replace view DMA_50 as SELECT date, symbol,AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50 " +       // create assist views calculating DMA_200 and DMA_50. NB !!! : Gearhost network database is not aale to process these views
-                                        "FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc; " +                      // Gearhost doesnt like  following bit: "OVER(ORDER BY Date ROWS BETWEEN 50 PRECEDING AND 0 FOLLOWING) DMA_50"
-                                        "create or replace view DMA_200 as SELECT date, symbol, AVG(lastPrice) OVER(ORDER BY Date ROWS BETWEEN 200 PRECEDING AND 0 FOLLOWING ) DMA_200 " +  // Local database is processing these views correctly.
-                                        "FROM algotrade.factdata where Symbol = '" + SelectedSymbol.ToString() + "' and Date <= current_date() order by date desc;";
-
-
-                        string query3 = "call _sp_DMACalculation()"; // Stored procedure updates factdata table with DMA_50 and DMA_200 values using assiting related views
-
-                        DatabaseCalls(query2);
-                        DatabaseCalls(query3);
-
                     }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show(e.ToString()); // displaying exception message if job crashes
-                    }
-                    finally
-                    {
-                        DatabaseCalls(sproc); // updating factdata with trading desision flag based on DMA_50 and DMA_200 values
-                        CleanData(SelectedSymbol); // processing data removal from positions, cash and trades tables. making inserts of initial zero values for  positions and cash
-                    }
-
+                    MessageBox.Show("Static Data Refreshed!!!"); // Pop up message when job run completed
                 }
-                MessageBox.Show("Static Data Refreshed!!!"); // Pop up message when job run completed
+                    else
+                    {
+                        MessageBox.Show("No Symbols added in list. Please Add more symbols");
+                    }
             }
-            else
+            catch (Exception e)
             {
-                MessageBox.Show("No Symbols added in list. Please Add more symbols");
+                MessageBox.Show(e.ToString());
             }
         }
 
@@ -736,7 +753,6 @@ namespace trading_WPF
                     ShowTrades();
                     ShowPositions();
                     ShowDailyCash();
-                    //ShowFactData();
                     ShowBuy();
                     ShowSell();
                 }
@@ -812,7 +828,6 @@ namespace trading_WPF
             try
             {
                 AddSymbol();
-
             }
             catch
             {
@@ -821,8 +836,10 @@ namespace trading_WPF
             }
             finally
             {
+                this.DataContext = this;
                 ShowSymbolsList();
             }
+            
         }
 
         private async void Process_Trade(object sender, RoutedEventArgs e)

@@ -12,7 +12,7 @@
     <!--<Frame x:Name="frame" Content="Frame" Margin="0" Source="/WpfClient;component/Pages/LoginPage.xaml" NavigationUIVisibility="Hidden"/>-->
 
     <Grid 
-        
+
         x:Name="Algotrade" Margin="0,0,37,71" RenderTransformOrigin="0.513,0.644" Width="872" HorizontalAlignment="Right">
         <Label x:Name="Symbols" Content="Symbols" HorizontalAlignment="Left" Margin="-474,18,0,0" VerticalAlignment="Top" Width="73" RenderTransformOrigin="0.712,10.923"/>
         <ListBox x:Name="SymbolsList" HorizontalAlignment="Left" Height="145" Margin="-474,63,0,0" VerticalAlignment="Top" Width="80" SelectionChanged="SymbolsList_SelectionChanged" SelectionMode="Single"/>
@@ -58,4 +58,5 @@
             <Label Content="Data Refresh and Processing" HorizontalAlignment="Left" Height="31" Margin="22,-1,0,0" VerticalAlignment="Top" Width="166"/>
         </Border>
     </Grid>
+    
 </Window>
