@@ -42,7 +42,7 @@ namespace trading_WPF
             end = EndDate.SelectedDate.Value;                  // read date from datepicker when changed
             //HashPass = Hash("Belgard24");
             //Console.WriteLine(HashPass); // d650ffa7c402a8fdde03cdc77a6b73c74b471ebf
-            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_Local"].ConnectionString;
+            connectionString = ConfigurationManager.ConnectionStrings["ALGOTRADE_AWS"].ConnectionString;
             connection = new MySqlConnection(connectionString);
 
             ShowSymbolsList(); // refresh symbols in symbol listbox
